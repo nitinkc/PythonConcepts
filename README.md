@@ -1,8 +1,3 @@
-# Complete-Python-3-Bootcamp
-Course Files for Complete Python 3 Bootcamp Course on Udemy
+# Learning Python Basics
 
-
-Get it now for 95% off with the link:
-https://www.udemy.com/complete-python-bootcamp/?couponCode=COMPLETE_GITHUB
-
-Thanks!
+Moving from Java to Python for career in MAchine Learning and Data Science.
