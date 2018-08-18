@@ -3,7 +3,7 @@ import time
 
 duration = 2*60*60
 #Testing
-#duration = 2
+duration = 2
 
 n_times = 6
 
