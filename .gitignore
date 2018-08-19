@@ -2,3 +2,11 @@
 venv/
 __pycache__/
 .ipynb_checkpoints/
+
+
+# From Git Global file
+# Mac related Files
+*~
+
+# storing custom attributes of a folder
+.DS_Store
