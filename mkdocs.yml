@@ -1,0 +1,84 @@
+site_name: Python Concepts
+site_description: A comprehensive guide to Python programming, covering foundational concepts, advanced techniques, and practical applications for developers of all levels.
+site_author: Nitin Chaurasia
+docs_dir: docs
+repo_url: https://github.com/nitinkc/PythonConcepts
+
+theme:
+  name: material
+  icon:
+    previous: fontawesome/solid/angle-left
+    next: fontawesome/solid/angle-right
+  palette:
+    - scheme: default
+      primary: brown
+      accent: brown
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: brown
+      accent: brown
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tabs
+    - navigation.sections
+    - header.autohide
+#    -  toc.integrate
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      disable_indented_code_blocks: true
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_div_format
+  - pymdownx.highlight:
+      use_pygments: true
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path: docs
+      check_paths: true
+  - pymdownx.tabbed:
+      alternate_style: true
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+  - def_list
+  - abbr
+  - pymdownx.arithmatex:
+      generic: true
+      block_tag: 'div'
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js
+  - js/mermaid-init.js
+
+extra_css:
+  - css/extra.css
+
+nav:
+  - Home: index.md
+  - "04 · Python Coding Drills":
+      - Part1: "04-python/01_foundation_mutability_and_data_structures.md"
+      - Part2: "04-python/02_scalpel_pythonic_idioms.md"
+      - Part3: "04-python/03_forge_algorithms_and_interview.md"
+  - "05 · Fast API":
+      - Part1: "05-FastAPI/01_fastapi_core_routing_and_models.md"
+      - Part2: "05-FastAPI/02_fastapi_pydantic_errors_deps.md"
+      - Part3: "05-FastAPI/03_fastapi_async_routers_production.md"
+
+exclude_docs: |
+  _abbreviations.md
+  03-mini-projects/code/**/README.md
+
