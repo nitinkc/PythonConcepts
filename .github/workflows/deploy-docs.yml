@@ -55,9 +55,12 @@ jobs:
           pip list | grep -iE "mkdocs|material|bootswatch"
 
       - name: Build MkDocs site
-        run: mkdocs build --clean
-        # --strict removed: avoids version-sensitive warning→error differences between local and CI
-        # Output goes to ./site/
+        run: mkdocs build --strict --clean
+        # Strict mode prevents broken documentation links from reaching the published site.
+        # Output goes to ./site/.
+
+      - name: Build JupyterLite lab
+        run: jupyter lite build --contents jupyterlite/content --output-dir site/lab
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3

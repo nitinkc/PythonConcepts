@@ -1,83 +1,67 @@
-# PythonLearning
+# Python Concepts
 
-A small Python learning workspace with package demos, unit tests, and Selenium examples.
+A focused Python learning repository with structured MkDocs documentation, small runnable examples, and tests.
 
-## 1) Setup
+## Repository structure
 
-Create and activate a virtual environment, then install dependencies.
+```text
+docs/       Systematic Python and FastAPI learning material
+examples/   One focused executable example per major concept
+tests/      Tests for the maintained examples
+mkdocs.yml  Documentation site configuration
+```
+
+The documentation is the canonical learning path. The examples exist only to demonstrate behavior that is useful to run or test.
+
+## Setup
 
 ```bash
-cd "/Users/nchaur590@cable.comcast.com/Programming/PythonLearning"
 python3 -m venv .venv
 source .venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-
-.venv/bin/python -m mkdocs serve
-
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 ```
 
-## 2) Run the current demos
-
-Run from the project root (organized under `demos/`):
+Alternatively, run commands in an isolated environment with `uv`:
 
 ```bash
-python3 -m demos.package_runner
-python3 -m demos.class_runner
-python3 -m demos.module_test_demo
-python3 -m demos.wildcard_import_demo
-python3 -m demos.dict_merge_demo
+uv run --with-requirements requirements.txt <command>
 ```
 
-## 3) Run unit tests
+## Documentation
 
 ```bash
-python3 -m unittest discover -s learning/basic_concepts/unitTest -p "test_*.py"
+mkdocs serve
+mkdocs build --strict
 ```
 
-## 4) Run the Selenium demo
+## Examples
 
 ```bash
-python3 learning/selenium/learn.py
+python -m examples.fundamentals.collections
+python -m examples.functions.imports_and_main
+python -m examples.object_oriented.calculator
+python -m examples.concurrency.execution_models
 ```
 
-Notes:
-- Selenium needs Chrome installed.
-- You may also need a compatible ChromeDriver available for your environment.
+The Jupyter GUI example is imported and displayed from a notebook:
 
-## 5) FastAPI-ready dependency flow
+```python
+from examples.gui import create_order_form
 
-`requirements.txt` already includes `fastapi` and `uvicorn` so you can start creating API demos without reinstalling packages each time.
+create_order_form()
+```
 
-When you add a new library, update and freeze versions with:
+## Tests
 
 ```bash
-pip install <package-name>
-pip freeze > requirements.txt
+python -m unittest discover -s tests -v
 ```
 
-Then anyone can recreate your environment with:
+## FastAPI example
 
 ```bash
-pip install -r requirements.txt
+uvicorn examples.web.fastapi_app:app --reload
 ```
 
-## 6) Run FastAPI demo
-
-The current API app is at `fastapi_demo/main.py` with `app = FastAPI()`.
-
-```bash
-uvicorn fastapi_demo.main:app --reload
-```
-
-Available routes:
-- `GET /`
-- `GET /health`
-
-## 7) Run API smoke test
-
-Start the API first, then in another terminal run:
-
-```bash
-python3 -m demos.api_smoke_test
-```
+Available routes include `GET /`, `GET /health`, `GET /items`, `GET /items/{item_id}`, and `POST /items`.

@@ -1,264 +1,137 @@
-# 🐍 Python Boot Camp — Part 2: The Scalpel
-### Pythonic Idioms, Comprehensions, Generators & Context Managers
+# Pythonic iteration and resource handling
 
-> **Goal:** Move from "it works" to "it's clean, fast, and clearly written by someone who knows the language."
+Python's iteration tools separate **what values are produced** from **how they are consumed**. Prefer clear, lazy pipelines for large inputs and explicit loops when logic has side effects or several branches.
 
----
+## Comprehensions
 
-## 1. List / Dict / Set Comprehensions
+Use comprehensions for a single transformation with an optional simple filter.
 
-The single biggest signal of Python fluency. If you're writing a `for` loop to build a list, ask yourself: can this be a comprehension?
-
-### List Comprehension
-
-```python
-# ❌ Verbose — junior style
-squares = []
-for n in range(10):
-    squares.append(n ** 2)
-
-# ✅ Comprehension — Pythonic
-squares = [n ** 2 for n in range(10)]
-print(squares)  # [0, 1, 4, 9, 16, 25, 36, 49, 64, 81]
-
-
-# With a filter (if clause)
-# ❌ Verbose
-evens = []
-for n in range(20):
-    if n % 2 == 0:
-        evens.append(n)
-
-# ✅ Comprehension
-evens = [n for n in range(20) if n % 2 == 0]
-print(evens)  # [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]
+```python { .python-runner title="Comprehensions experiment" }
+squares = [number**2 for number in range(10)]
+even_squares = {number: number**2 for number in range(10) if number % 2 == 0}
+letters = {word[0] for word in ["apple", "apricot", "banana"]}
 ```
 
-### Dict Comprehension
+Do not force complex branching, exception handling, or side effects into a comprehension. A normal loop is then easier to read.
+
+## Iterables, iterators, and generators
+
+An **iterable** can produce an iterator. An **iterator** tracks progress and returns its next item through `next()`. A **generator** is an iterator created by a function containing `yield` or by a generator expression.
 
 ```python
-names = ["alice", "bob", "charlie"]
+def read_nonempty(lines):
+    for line in lines:
+        text = line.strip()
+        if text:
+            yield text
 
-# Build a dict mapping name → length
-name_lengths = {name: len(name) for name in names}
-print(name_lengths)  # {'alice': 5, 'bob': 3, 'charlie': 7}
-
-# Invert a dictionary (swap keys and values)
-original = {"a": 1, "b": 2, "c": 3}
-inverted = {v: k for k, v in original.items()}
-print(inverted)  # {1: 'a', 2: 'b', 3: 'c'}
+length_total = sum(len(line) for line in read_nonempty(source))
 ```
 
-### Set Comprehension
+Generators are lazy: they produce one item at a time and are normally consumed once. This reduces memory use, but it does not automatically make computation faster.
+
+## Useful built-ins
 
 ```python
-words = ["apple", "banana", "avocado", "blueberry", "apricot"]
+for index, value in enumerate(values, start=1):
+    print(index, value)
 
-# Get unique first letters
-first_letters = {word[0] for word in words}
-print(first_letters)  # {'a', 'b'}  — a set, so no duplicates
+pairs = zip(names, scores, strict=True)
+ordered = sorted(records, key=lambda record: record["date"], reverse=True)
+has_error = any(result.failed for result in results)
+all_ready = all(worker.ready for worker in workers)
 ```
 
-### Nested Comprehension (Flatten a 2D list)
+Other common tools include `min`, `max`, `sum`, `reversed`, `map`, and `filter`. Comprehensions are often clearer than `map` and `filter` when a lambda would be required.
+
+## Standard-library iteration tools
+
+- `collections.Counter` counts hashable values.
+- `collections.defaultdict` supplies missing values from a factory.
+- `collections.deque` supports efficient operations at both ends.
+- `itertools.chain` joins iterables lazily.
+- `itertools.islice` takes a lazy slice.
+- `itertools.pairwise` yields adjacent pairs.
+- `functools.reduce` combines values cumulatively, though `sum` or a loop is often clearer.
 
 ```python
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+from collections import Counter, deque
+from itertools import chain, islice
 
-# ❌ Verbose
-flat = []
-for row in matrix:
-    for val in row:
-        flat.append(val)
-
-# ✅ Comprehension
-flat = [val for row in matrix for val in row]
-print(flat)  # [1, 2, 3, 4, 5, 6, 7, 8, 9]
+counts = Counter(words)
+queue = deque([start])
+first_ten = list(islice(chain(source_a, source_b), 10))
 ```
 
-> **Tip:** Nested comprehensions read left-to-right, outer loop first — same order as the nested for loops.
+## Decorators
 
----
+A decorator receives a callable and returns a replacement callable. Preserve metadata with `functools.wraps`.
 
-## 2. Generators — Memory-Efficient Iteration
+```python { .python-runner title="Decorator experiment" }
+from functools import wraps
 
-When data is large, you don't want to build a full list in memory. Generators produce values **one at a time, on demand**.
+def trace(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        print(f"calling {function.__name__}")
+        return function(*args, **kwargs)
+    return wrapper
+```
 
-### The `yield` keyword
+Decorators are useful for cross-cutting behavior such as caching, registration, authorization, and instrumentation. Keep business logic visible rather than stacking opaque decorators.
+
+## Context managers
+
+A context manager pairs acquisition with guaranteed cleanup.
 
 ```python
-# This builds the ENTIRE list in memory first
-def get_squares_list(n):
-    return [i ** 2 for i in range(n)]
+from pathlib import Path
 
-# This generates ONE value at a time — uses almost no memory
-def get_squares_gen(n):
-    for i in range(n):
-        yield i ** 2
-
-# Usage looks identical from the outside
-for val in get_squares_gen(1_000_000):
-    print(val)  # Memory: stores only 1 value at a time
+with Path("data.txt").open(encoding="utf-8") as stream:
+    data = stream.read()
 ```
 
-### Generator Expression (inline, like a comprehension)
-
-```python
-# List comprehension — stores all 1M values in RAM
-squares_list = [n ** 2 for n in range(1_000_000)]
-
-# Generator expression — uses () instead of []
-squares_gen = (n ** 2 for n in range(1_000_000))
-
-# Both work the same in a for loop or sum()
-total = sum(n ** 2 for n in range(1_000_000))  # Pythonic — no intermediate list
-```
-
-### Practical example: reading a huge file
-
-```python
-# ❌ Loads entire file into RAM
-def read_all(filepath):
-    with open(filepath) as f:
-        return f.readlines()  # entire file in memory
-
-# ✅ Processes line by line — O(1) memory regardless of file size
-def read_lines(filepath):
-    with open(filepath) as f:
-        for line in f:
-            yield line.strip()
-
-for line in read_lines("huge_log.txt"):
-    process(line)
-```
-
-> **Interview line:** *"For large data pipelines, I prefer generators over lists — they're lazy, so memory usage stays constant regardless of input size."*
-
----
-
-## 3. Context Managers — The `with` Statement
-
-Any time you open a resource (file, DB connection, lock), use `with`. It guarantees cleanup even if an error occurs.
-
-### File I/O
-
-```python
-# ❌ Manual — file leaks if an exception is raised before f.close()
-f = open("data.txt", "r")
-data = f.read()
-f.close()
-
-# ✅ Context manager — file is always closed, even on exception
-with open("data.txt", "r") as f:
-    data = f.read()
-# f is closed here automatically
-```
-
-### Multiple resources at once
-
-```python
-# Read one file and write to another — both closed automatically
-with open("input.txt", "r") as infile, open("output.txt", "w") as outfile:
-    for line in infile:
-        outfile.write(line.upper())
-```
-
-### Writing your own context manager
+Create one from a generator when needed:
 
 ```python
 from contextlib import contextmanager
 
 @contextmanager
-def timer(label):
-    import time
-    start = time.time()
-    yield                          # code inside 'with' block runs here
-    elapsed = time.time() - start
-    print(f"{label}: {elapsed:.3f}s")
-
-with timer("matrix multiply"):
-    result = [[sum(a * b for a, b in zip(row, col))
-               for col in zip(*matrix_b)]
-              for row in matrix_a]
+def transaction(connection):
+    try:
+        yield connection
+        connection.commit()
+    except Exception:
+        connection.rollback()
+        raise
 ```
 
----
+## Experiment: lazy iteration
 
-## 4. Useful Built-ins That Signal Fluency
+Change the filter, remove `islice`, or consume the generator twice and compare the results.
 
-Interviewers love to see these used naturally.
+```python { .python-runner title="Lazy iteration experiment" }
+from itertools import islice
 
-```python
-numbers = [3, 1, 4, 1, 5, 9, 2, 6]
 
-# enumerate — get index AND value (never use range(len(...)))
-for i, val in enumerate(numbers):
-    print(f"Index {i}: {val}")
+def matching_squares(limit, divisor):
+    for number in range(limit):
+        square = number ** 2
+        if square % divisor == 0:
+            yield square
 
-# zip — iterate two sequences in parallel
-names = ["Alice", "Bob", "Charlie"]
-scores = [95, 87, 92]
-for name, score in zip(names, scores):
-    print(f"{name}: {score}")
-
-# sorted with key — sort by custom logic
-words = ["banana", "fig", "apple", "date"]
-print(sorted(words, key=len))           # ['fig', 'fig', 'date', 'apple', 'banana']
-print(sorted(words, key=lambda w: w[-1]))  # sort by last letter
-
-# any / all — readable boolean aggregation
-scores = [88, 92, 71, 95]
-print(all(s >= 70 for s in scores))  # True — all passing
-print(any(s >= 90 for s in scores))  # True — at least one A
-
-# collections.Counter — frequency map in one line
-from collections import Counter
-words = ["apple", "banana", "apple", "cherry", "banana", "apple"]
-counts = Counter(words)
-print(counts)               # Counter({'apple': 3, 'banana': 2, 'cherry': 1})
-print(counts.most_common(2))  # [('apple', 3), ('banana', 2)]
+values = matching_squares(1_000_000, 3)
+print("first five:", list(islice(values, 5)))
+print("next three: ", list(islice(values, 3)))
+print("remaining generator:", values)
 ```
 
----
+## Checkpoint
 
-## 5. `itertools` — Know It Exists
+- Use comprehensions only when they remain readable.
+- Explain iterable, iterator, and generator.
+- Build lazy pipelines without accidentally consuming them twice.
+- Reach for standard-library tools before custom loops.
+- Use decorators and context managers for focused, reusable behavior.
 
-You don't need to memorize the whole library, but mentioning it is a green flag.
-
-```python
-import itertools
-
-# chain — flatten iterables without building a list
-combined = list(itertools.chain([1, 2], [3, 4], [5, 6]))
-print(combined)  # [1, 2, 3, 4, 5, 6]
-
-# groupby — group consecutive elements by a key
-from itertools import groupby
-data = [("a", 1), ("a", 2), ("b", 3), ("b", 4), ("c", 5)]
-for key, group in groupby(data, key=lambda x: x[0]):
-    print(key, list(group))
-# a [('a', 1), ('a', 2)]
-# b [('b', 3), ('b', 4)]
-# c [('c', 5)]
-
-# islice — take the first N items from any iterator (memory safe)
-gen = (x ** 2 for x in range(1_000_000))
-first_five = list(itertools.islice(gen, 5))
-print(first_five)  # [0, 1, 4, 9, 16]
-```
-
-> **Interview line:** *"Before writing a custom loop, I check if `itertools` has it — it's optimized in C and handles edge cases already."*
-
----
-
-## ✅ Phase 2 Checklist
-
-- [ ] Can convert any simple `for`/`append` loop into a comprehension instantly
-- [ ] Know the difference between `[...]` (list) and `(...)` (generator expression)
-- [ ] Can explain *why* generators save memory (lazy evaluation, one value at a time)
-- [ ] Always use `with` for file and resource handling — no exceptions
-- [ ] Comfortable with `enumerate`, `zip`, `sorted(key=...)`, `any`/`all`, `Counter`
-- [ ] Can name-drop `itertools` and give one example
-
----
-
-*Next up → **Part 3: The Forge** — Big-O analysis, solving problems three ways, and interview performance strategy.*
+**Next:** [Errors, files, testing, and typing](05_reliability_testing_and_typing.md)

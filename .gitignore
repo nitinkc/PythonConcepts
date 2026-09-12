@@ -2,6 +2,8 @@
 .venv/
 __pycache__/
 .ipynb_checkpoints/
+.jupyterlite.doit.db
+site/
 
 
 # From Git Global file
