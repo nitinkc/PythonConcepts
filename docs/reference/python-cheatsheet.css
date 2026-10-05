@@ -1,0 +1,88 @@
+.python-cheatsheet .cheatsheet-hero {
+  margin: 0 0 1.5rem;
+  padding: 2rem;
+  border: 1px solid color-mix(in srgb, var(--md-primary-fg-color) 28%, transparent);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--md-primary-fg-color) 14%, transparent), color-mix(in srgb, var(--md-accent-fg-color) 8%, transparent));
+}
+
+.python-cheatsheet .cheatsheet-hero h1 {
+  margin: 0 0 .4rem;
+  font-weight: 750;
+}
+
+.python-cheatsheet .cheatsheet-hero p {
+  max-width: 45rem;
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.python-cheatsheet .cheatsheet-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: 1rem 0 2rem;
+}
+
+.python-cheatsheet .cheatsheet-nav a,
+.python-cheatsheet .level {
+  display: inline-block;
+  padding: .25rem .65rem;
+  border: 1px solid color-mix(in srgb, var(--md-primary-fg-color) 32%, transparent);
+  border-radius: 999px;
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  text-transform: uppercase;
+}
+
+.python-cheatsheet .cheatsheet-nav a:hover {
+  color: var(--md-primary-fg-color);
+  background: color-mix(in srgb, var(--md-primary-fg-color) 9%, transparent);
+}
+
+.python-cheatsheet .level-essential { color: #087f5b; border-color: #20c997; }
+.python-cheatsheet .level-common { color: #1864ab; border-color: #4dabf7; }
+.python-cheatsheet .level-advanced { color: #9c36b5; border-color: #da77f2; }
+.python-cheatsheet .level-critical { color: #c92a2a; border-color: #ff8787; }
+
+.python-cheatsheet h2 {
+  margin-top: 2.5rem;
+  padding-bottom: .45rem;
+  border-bottom: 2px solid color-mix(in srgb, var(--md-primary-fg-color) 22%, transparent);
+}
+
+.python-cheatsheet h3 {
+  margin-top: 1.8rem;
+}
+
+.python-cheatsheet h3 + p .level {
+  margin-top: -.5rem;
+}
+
+.python-cheatsheet .grid.cards {
+  margin-top: 1rem;
+}
+
+.python-cheatsheet .grid.cards > ul > li {
+  border-radius: .75rem;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.python-cheatsheet .grid.cards > ul > li:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-shadow-z2);
+}
+
+.python-cheatsheet table {
+  font-size: .82rem;
+}
+
+.python-cheatsheet .highlight pre {
+  max-height: 31rem;
+}
+
+@media screen and (max-width: 44.984375em) {
+  .python-cheatsheet .cheatsheet-hero { padding: 1.25rem; }
+  .python-cheatsheet .cheatsheet-nav { gap: .35rem; }
+}
