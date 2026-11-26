@@ -1,10 +1,11 @@
 # Object-oriented Python
 
-Classes combine state and behavior. Use them when an object has invariants, related operations, or a meaningful lifecycle. A plain function, dictionary, or data class is often better for simpler data transformations.
+Classes combine state and behavior. Use them when an object has invariants, related operations, or a meaningful
+lifecycle. A plain function, dictionary, or data class is often better for simpler data transformations.
 
 ## Classes and instances
 
-```python { .python-runner title="Class invariants experiment" }
+```python
 class BankAccount:
     bank_name = "Example Bank"
 
@@ -22,7 +23,8 @@ class BankAccount:
         self._balance += amount
 ```
 
-Instance attributes belong to each object. Class attributes are shared defaults and should not hold mutable per-instance state.
+Instance attributes belong to each object. Class attributes are shared defaults and should not hold mutable per-instance
+state.
 
 ## Instance, class, and static methods
 
@@ -32,6 +34,7 @@ Instance attributes belong to each object. Class attributes are shared defaults 
 
 ```python { .python-runner title="Alternative constructor experiment" }
 from datetime import date
+
 
 class Person:
     def __init__(self, name: str, birth_year: int):
@@ -50,10 +53,12 @@ Inheritance models an **is-a** relationship. Override behavior while preserving 
 ```python { .python-runner title="Abstract polymorphism experiment" }
 from abc import ABC, abstractmethod
 
+
 class Shape(ABC):
     @abstractmethod
     def area(self) -> float:
         raise NotImplementedError
+
 
 class Rectangle(Shape):
     def __init__(self, width: float, height: float):
@@ -64,7 +69,8 @@ class Rectangle(Shape):
         return self.width * self.height
 ```
 
-Polymorphism means callers depend on supported behavior rather than a concrete class. Python commonly uses duck typing: if an object provides the required operation, its inheritance tree may not matter.
+Polymorphism means callers depend on supported behavior rather than a concrete class. Python commonly uses duck typing:
+if an object provides the required operation, its inheritance tree may not matter.
 
 ## Prefer composition for has-a relationships
 
@@ -72,6 +78,7 @@ Polymorphism means callers depend on supported behavior rather than a concrete c
 class Engine:
     def start(self) -> None:
         print("started")
+
 
 class Car:
     def __init__(self, engine: Engine):
@@ -87,6 +94,7 @@ Use `dataclass` for data-focused objects with generated initialization, represen
 ```python { .python-runner title="Data class experiment" }
 from dataclasses import dataclass, field
 
+
 @dataclass(frozen=True, slots=True)
 class Point:
     x: float
@@ -94,17 +102,20 @@ class Point:
     tags: tuple[str, ...] = field(default_factory=tuple)
 ```
 
-Use `default_factory` for mutable defaults. `frozen=True` prevents normal reassignment, and `slots=True` reduces per-instance overhead and accidental attributes.
+Use `default_factory` for mutable defaults. `frozen=True` prevents normal reassignment, and `slots=True` reduces
+per-instance overhead and accidental attributes.
 
-## Protocols
+## Protocols **[FDE]**
 
 Protocols describe behavior structurally and support type checking without requiring inheritance.
 
 ```python { .python-runner title="Protocol experiment" }
 from typing import Protocol
 
+
 class Writable(Protocol):
     def write(self, text: str) -> int: ...
+
 
 def save(output: Writable, text: str) -> None:
     output.write(text)
@@ -112,7 +123,8 @@ def save(output: Writable, text: str) -> None:
 
 ## Special methods
 
-Implement special methods only when the corresponding behavior is natural: `__repr__` for debugging, `__len__` for size, `__iter__` for iteration, and `__enter__`/`__exit__` for resource management.
+Implement special methods only when the corresponding behavior is natural: `__repr__` for debugging, `__len__` for size,
+`__iter__` for iteration, and `__enter__`/`__exit__` for resource management.
 
 ## Experiment: composition and polymorphism
 
@@ -123,9 +135,11 @@ class ConsoleNotifier:
     def send(self, message):
         print(f"console: {message}")
 
+
 class UppercaseFormatter:
     def format(self, message):
         return message.upper()
+
 
 class AlertService:
     def __init__(self, notifier, formatter):
@@ -134,6 +148,7 @@ class AlertService:
 
     def alert(self, message):
         self.notifier.send(self.formatter.format(message))
+
 
 service = AlertService(ConsoleNotifier(), UppercaseFormatter())
 service.alert("deployment complete")

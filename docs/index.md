@@ -1,42 +1,45 @@
 # Python Concepts
 
-A structured path from Python fundamentals to production APIs, with concise explanations, focused examples, and a final quick-reference guide.
+A structured path from Python fundamentals to production APIs, with concise explanations, focused examples, and a final
+quick-reference guide.
 
 ## Choose a path
 
 <div class="grid cards" markdown>
 
--   **Learn Python systematically**
+- **Learn Python systematically**
 
-    ---
+  ---
 
-    Start with syntax and the object model, then progress through functions, object-oriented design, iterators, testing, concurrency, and algorithms.
+  Start with syntax and the object model, then progress through functions, object-oriented design, iterators, testing,
+  concurrency, and algorithms.
 
-    [Start learning](04-python/01_foundation_mutability_and_data_structures.md)
+  [Start learning](04-python/01_foundation_mutability_and_data_structures.md)
 
--   **Build APIs with FastAPI**
+- **Build APIs with FastAPI**
 
-    ---
+  ---
 
-    Learn routing, Pydantic validation, dependency injection, asynchronous I/O, application structure, security, and testing.
+  Learn routing, Pydantic validation, dependency injection, asynchronous I/O, application structure, security, and
+  testing.
 
-    [Start FastAPI](05-FastAPI/01_fastapi_core_routing_and_models.md)
+  [Start FastAPI](05-FastAPI/01_fastapi_core_routing_and_models.md)
 
--   **Prepare for senior interviews**
+- **Prepare for senior interviews**
 
-    ---
+  ---
 
-    Review advanced internals, production trade-offs, system-design prompts, and scored quizzes.
+  Review advanced internals, production trade-offs, system-design prompts, and scored quizzes.
 
-    [Open interview guide](interview/index.md)
+  [Open interview guide](interview/index.md)
 
--   **Look something up**
+- **Look something up**
 
-    ---
+  ---
 
-    Use the compact syntax, collection, exception, typing, testing, and complexity tables.
+  Use the compact syntax, collection, exception, typing, testing, and complexity tables.
 
-    [Open quick reference](reference/python-quick-reference.md)
+  [Open quick reference](reference/python-quick-reference.md)
 
 </div>
 
@@ -57,4 +60,10 @@ A structured path from Python fundamentals to production APIs, with concise expl
 
 ## How to use this site
 
-Read each topic in order when learning. Each page explains the mental model first, provides only the code needed to demonstrate it, and ends with a checklist. When coding, use the quick reference and site search instead of rereading every chapter.
+Read each topic in order when learning. Each page explains the mental model first, provides only the code needed to
+demonstrate it, and ends with a checklist. When coding, use the quick reference and site search instead of rereading
+every chapter.
+
+Sections tagged **`[FDE]`** mark the modern deep-dive topics that FDE-style interviews probe hardest: structural pattern
+matching, `Protocol` classes, `asyncio` execution, strict `mypy` enforcement, and Pydantic V2. Practice tests for all
+five live at the bottom of the [senior quiz page](interview/quizzes.md).

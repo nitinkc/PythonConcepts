@@ -1,17 +1,34 @@
 # ⚡ FastAPI Boot Camp — Part 2: Pydantic, Error Handling & Dependencies
+
 ### Validation, Custom Errors & Dependency Injection
 
-> **Goal:** Go beyond basic models. Know how to validate complex data, raise meaningful errors, and share logic cleanly across routes using dependency injection.
+> **Goal:** Go beyond basic models. Know how to validate complex data, raise meaningful errors, and share logic cleanly
+> across routes using dependency injection.
 
 ---
 
-## 1. Pydantic Deep Dive
+## 1. Pydantic Deep Dive **[FDE]**
+
+!!! note "Pydantic V2"
+    Everything here uses the **V2 API** — the version interviewers probe. Know the renames cold:
+
+    | V1 (legacy) | V2 (current) |
+    |:-----|:---|
+    | `@validator("field")` | `@field_validator("field")` |
+    | `@root_validator` | `@model_validator(mode="before"/"after")` |
+    | `.dict()` / `.json()` | `.model_dump()` / `.model_dump_json()` |
+    | `.parse_obj(data)` | `.model_validate(data)` |
+    | `class Config:` | `model_config = ConfigDict(...)` |
+
+    V2's validation core is written in Rust (`pydantic-core`), so models are ~5–20x faster than V1 — a useful "why it matters" detail.
+
 
 ### Field-level validation with `Field()`
 
 ```python
 from pydantic import BaseModel, Field
 from typing import Optional
+
 
 class Product(BaseModel):
     name: str = Field(min_length=1, max_length=100, description="Product name")
@@ -28,6 +45,7 @@ class Product(BaseModel):
 
 ```python
 from pydantic import BaseModel, field_validator, model_validator
+
 
 class Order(BaseModel):
     username: str
@@ -61,16 +79,18 @@ class Order(BaseModel):
 ```python
 from typing import List
 
+
 class Address(BaseModel):
     street: str
     city: str
     zip_code: str = Field(pattern=r"^\d{5}$")
 
+
 class Customer(BaseModel):
     name: str
     email: str
-    address: Address          # nested model — 05-FastAPI handles the nested JSON automatically
-    tags: List[str] = []      # list of strings
+    address: Address  # nested model — 05-FastAPI handles the nested JSON automatically
+    tags: List[str] = []  # list of strings
 
 # Request body:
 # {
@@ -98,7 +118,8 @@ def partial_update(item_id: int, item: Item):
     return updated
 ```
 
-> **Interview line:** *"For PATCH endpoints, I always use `exclude_unset=True` — otherwise default values overwrite fields the client didn't intend to change."*
+> **Interview line:** *"For PATCH endpoints, I always use `exclude_unset=True` — otherwise default values overwrite
+> fields the client didn't intend to change."*
 
 ---
 
@@ -110,6 +131,7 @@ def partial_update(item_id: int, item: Item):
 from fastapi import FastAPI, HTTPException, status
 
 fake_db = {1: "Widget", 2: "Gadget"}
+
 
 @app.get("/items/{item_id}")
 def get_item(item_id: int):
@@ -129,10 +151,12 @@ def get_item(item_id: int):
 from fastapi import Request
 from fastapi.responses import JSONResponse
 
+
 class InsufficientStockError(Exception):
     def __init__(self, item_id: int, available: int):
         self.item_id = item_id
         self.available = available
+
 
 @app.exception_handler(InsufficientStockError)
 async def stock_exception_handler(request: Request, exc: InsufficientStockError):
@@ -146,6 +170,7 @@ async def stock_exception_handler(request: Request, exc: InsufficientStockError)
         }
     )
 
+
 @app.post("/orders/")
 def create_order(item_id: int, quantity: int):
     stock = get_stock(item_id)
@@ -158,6 +183,7 @@ def create_order(item_id: int, quantity: int):
 
 ```python
 from fastapi.exceptions import RequestValidationError
+
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -183,14 +209,17 @@ FastAPI's `Depends()` is one of its most powerful features. Use it to share logi
 ```python
 from fastapi import Depends
 
+
 # Define reusable logic as a function
 def pagination_params(skip: int = 0, limit: int = Query(default=10, le=100)):
     return {"skip": skip, "limit": limit}
+
 
 # Inject into any route
 @app.get("/items/")
 def list_items(pagination: dict = Depends(pagination_params)):
     return {"pagination": pagination, "items": get_items(**pagination)}
+
 
 @app.get("/users/")
 def list_users(pagination: dict = Depends(pagination_params)):
@@ -208,6 +237,7 @@ class CommonQueryParams:
         self.skip = skip
         self.limit = limit
 
+
 @app.get("/items/")
 def list_items(commons: CommonQueryParams = Depends(CommonQueryParams)):
     # Shorthand: Depends() with no args infers the class
@@ -222,8 +252,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
+
 def get_current_user(token: str = Depends(oauth2_scheme)):
-    user = decode_token(token)          # your token validation logic
+    user = decode_token(token)  # your token validation logic
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -232,22 +263,26 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         )
     return user
 
-def require_admin(current_user = Depends(get_current_user)):
+
+def require_admin(current_user=Depends(get_current_user)):
     if not current_user.is_admin:
         raise HTTPException(status_code=403, detail="Admin access required")
     return current_user
 
+
 # Protect specific routes
 @app.get("/admin/stats")
-def admin_stats(admin = Depends(require_admin)):  # chains: token → user → admin check
+def admin_stats(admin=Depends(require_admin)):  # chains: token → user → admin check
     return get_stats()
 
+
 @app.get("/profile")
-def my_profile(user = Depends(get_current_user)):  # only needs auth, not admin
+def my_profile(user=Depends(get_current_user)):  # only needs auth, not admin
     return user
 ```
 
-> **Interview line:** *"Dependency injection in FastAPI lets me write auth, pagination, and DB session logic once and compose it across routes — no decorators, no middleware spaghetti."*
+> **Interview line:** *"Dependency injection in FastAPI lets me write auth, pagination, and DB session logic once and
+> compose it across routes — no decorators, no middleware spaghetti."*
 
 ### Database session dependency — the standard pattern
 
@@ -255,12 +290,14 @@ def my_profile(user = Depends(get_current_user)):  # only needs auth, not admin
 from sqlalchemy.orm import Session
 from database import SessionLocal  # your DB setup
 
+
 def get_db():
     db = SessionLocal()
     try:
-        yield db          # generator — gives db to route, then runs cleanup
+        yield db  # generator — gives db to route, then runs cleanup
     finally:
-        db.close()        # always closes, even on exception
+        db.close()  # always closes, even on exception
+
 
 @app.get("/items/{item_id}")
 def get_item(item_id: int, db: Session = Depends(get_db)):
@@ -279,15 +316,17 @@ Run work after returning the response — useful for sending emails, logging, et
 ```python
 from fastapi import BackgroundTasks
 
+
 def send_notification_email(email: str, message: str):
     # Simulating a slow operation (email sending)
     time.sleep(2)
     print(f"Email sent to {email}: {message}")
 
+
 @app.post("/users/{user_id}/notify")
 def notify_user(
-    user_id: int,
-    background_tasks: BackgroundTasks
+        user_id: int,
+        background_tasks: BackgroundTasks
 ):
     user = get_user(user_id)
     background_tasks.add_task(

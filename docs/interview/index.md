@@ -1,15 +1,16 @@
 # Senior Python interview guide
 
-Use this section for rapid preparation after completing the learning path. Senior interviews evaluate judgment: explain not only how Python behaves, but also the trade-offs, failure modes, and production consequences.
+Use this section for rapid preparation after completing the learning path. Senior interviews evaluate judgment: explain
+not only how Python behaves, but also the trade-offs, failure modes, and production consequences.
 
 ## Preparation tracks
 
-| Available time | Focus |
-|---|---|
-| 30 minutes | Review the rapid-recall tables and rehearse two system-design stories |
-| 2 hours | Add object model, concurrency, testing, and performance sections |
-| 1 day | Complete the advanced guide, quizzes, and two coding exercises |
-| 1 week | Repeat quizzes, practice design discussions, and conduct mock interviews |
+| Available time | Focus                                                                    |
+|----------------|--------------------------------------------------------------------------|
+| 30 minutes     | Review the rapid-recall tables and rehearse two system-design stories    |
+| 2 hours        | Add object model, concurrency, testing, and performance sections         |
+| 1 day          | Complete the advanced guide, quizzes, and two coding exercises           |
+| 1 week         | Repeat quizzes, practice design discussions, and conduct mock interviews |
 
 ## Rapid recall
 
@@ -25,14 +26,14 @@ Use this section for rapid preparation after completing the learning path. Senio
 
 ### Collections and complexity
 
-| Operation | Typical cost | Caveat |
-|---|---:|---|
-| List index or append | `O(1)` | Append is amortized |
-| List membership or insertion near front | `O(n)` | Elements are scanned or shifted |
-| Dict/set lookup | `O(1)` average | Hash collisions can degrade behavior |
-| Heap push/pop | `O(log n)` | Root lookup is `O(1)` |
-| Sorting | `O(n log n)` | Timsort exploits existing order |
-| `deque` append/pop at either end | `O(1)` | Random access is not its strength |
+| Operation                               |   Typical cost | Caveat                               |
+|-----------------------------------------|---------------:|--------------------------------------|
+| List index or append                    |         `O(1)` | Append is amortized                  |
+| List membership or insertion near front |         `O(n)` | Elements are scanned or shifted      |
+| Dict/set lookup                         | `O(1)` average | Hash collisions can degrade behavior |
+| Heap push/pop                           |     `O(log n)` | Root lookup is `O(1)`                |
+| Sorting                                 |   `O(n log n)` | Timsort exploits existing order      |
+| `deque` append/pop at either end        |         `O(1)` | Random access is not its strength    |
 
 ### Functions and iteration
 
@@ -45,14 +46,15 @@ Use this section for rapid preparation after completing the learning path. Senio
 
 ### Concurrency
 
-| Work | First choice | Reason |
-|---|---|---|
-| Blocking I/O using synchronous libraries | Threads | Waiting releases execution opportunity |
-| Many async-compatible I/O operations | `asyncio` | Low-overhead cooperative scheduling |
-| CPU-heavy pure Python | Processes | Bypasses the conventional CPython GIL |
-| Numeric array operations | Optimized native library | Vectorization usually beats Python orchestration |
+| Work                                     | First choice             | Reason                                           |
+|------------------------------------------|--------------------------|--------------------------------------------------|
+| Blocking I/O using synchronous libraries | Threads                  | Waiting releases execution opportunity           |
+| Many async-compatible I/O operations     | `asyncio`                | Low-overhead cooperative scheduling              |
+| CPU-heavy pure Python                    | Processes                | Bypasses the conventional CPython GIL            |
+| Numeric array operations                 | Optimized native library | Vectorization usually beats Python orchestration |
 
-`async` is concurrency, not automatic parallelism. Never call blocking I/O directly on an event-loop thread. Use bounded concurrency, timeouts, cancellation, and structured cleanup.
+`async` is concurrency, not automatic parallelism. Never call blocking I/O directly on an event-loop thread. Use bounded
+concurrency, timeouts, cancellation, and structured cleanup.
 
 ### Reliability
 
@@ -78,7 +80,10 @@ Use this section for rapid preparation after completing the learning path. Senio
 
 For design and experience questions, use **Context → Constraints → Decision → Trade-offs → Evidence**.
 
-> We processed independent I/O-bound jobs with a bounded thread pool because the client library was synchronous. We capped concurrency to protect the dependency, applied per-request timeouts, and collected latency and error metrics. Async I/O could reduce thread overhead, but migrating the client would have increased delivery risk. Load tests showed a fourfold throughput improvement without raising downstream error rates.
+> We processed independent I/O-bound jobs with a bounded thread pool because the client library was synchronous. We
+> capped concurrency to protect the dependency, applied per-request timeouts, and collected latency and error metrics.
+> Async I/O could reduce thread overhead, but migrating the client would have increased delivery risk. Load tests showed a
+> fourfold throughput improvement without raising downstream error rates.
 
 Avoid presenting a technology as universally best. State what evidence would make you choose differently.
 
@@ -111,14 +116,14 @@ Quantify impact where possible, but do not invent precision.
 
 ## Common weak answers
 
-| Weak answer | Stronger direction |
-|---|---|
-| “Async makes Python faster.” | Explain I/O concurrency, blocking hazards, and when processes are needed |
-| “Dict lookup is always O(1).” | Say average `O(1)` and discuss hashing and key correctness |
-| “The GIL means threads are useless.” | Separate Python CPU work from I/O and native extensions |
-| “Microservices scale better.” | Start from boundaries, deployment needs, operational cost, and team constraints |
-| “We need 100% test coverage.” | Prioritize risk, contracts, failure modes, and mutation-resistant assertions |
-| “Type hints prevent invalid input.” | Separate static analysis from runtime validation |
+| Weak answer                          | Stronger direction                                                              |
+|--------------------------------------|---------------------------------------------------------------------------------|
+| “Async makes Python faster.”         | Explain I/O concurrency, blocking hazards, and when processes are needed        |
+| “Dict lookup is always O(1).”        | Say average `O(1)` and discuss hashing and key correctness                      |
+| “The GIL means threads are useless.” | Separate Python CPU work from I/O and native extensions                         |
+| “Microservices scale better.”        | Start from boundaries, deployment needs, operational cost, and team constraints |
+| “We need 100% test coverage.”        | Prioritize risk, contracts, failure modes, and mutation-resistant assertions    |
+| “Type hints prevent invalid input.”  | Separate static analysis from runtime validation                                |
 
 ## Final checklist
 
@@ -127,4 +132,4 @@ Quantify impact where possible, but do not invent precision.
 - Analyze unfamiliar code for complexity, resource lifetime, and failure behavior.
 - Design a typed, observable, testable service and defend its boundaries.
 - Communicate alternatives and evidence instead of only naming tools.
-- Complete the [advanced Python guide](advanced-python.md) and [senior quizzes](quizzes.md).
+- Complete the [advanced Python guide](../04-python/advanced-python.md) and [senior quizzes](quizzes.md).

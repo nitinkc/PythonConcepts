@@ -1,22 +1,25 @@
 # Pythonic iteration and resource handling
 
-Python's iteration tools separate **what values are produced** from **how they are consumed**. Prefer clear, lazy pipelines for large inputs and explicit loops when logic has side effects or several branches.
+Python's iteration tools separate **what values are produced** from **how they are consumed**. Prefer clear, lazy
+pipelines for large inputs and explicit loops when logic has side effects or several branches.
 
 ## Comprehensions
 
 Use comprehensions for a single transformation with an optional simple filter.
 
 ```python { .python-runner title="Comprehensions experiment" }
-squares = [number**2 for number in range(10)]
-even_squares = {number: number**2 for number in range(10) if number % 2 == 0}
+squares = [number ** 2 for number in range(10)]
+even_squares = {number: number ** 2 for number in range(10) if number % 2 == 0}
 letters = {word[0] for word in ["apple", "apricot", "banana"]}
 ```
 
-Do not force complex branching, exception handling, or side effects into a comprehension. A normal loop is then easier to read.
+Do not force complex branching, exception handling, or side effects into a comprehension. A normal loop is then easier
+to read.
 
 ## Iterables, iterators, and generators
 
-An **iterable** can produce an iterator. An **iterator** tracks progress and returns its next item through `next()`. A **generator** is an iterator created by a function containing `yield` or by a generator expression.
+An **iterable** can produce an iterator. An **iterator** tracks progress and returns its next item through `next()`. A
+**generator** is an iterator created by a function containing `yield` or by a generator expression.
 
 ```python
 def read_nonempty(lines):
@@ -25,10 +28,12 @@ def read_nonempty(lines):
         if text:
             yield text
 
+
 length_total = sum(len(line) for line in read_nonempty(source))
 ```
 
-Generators are lazy: they produce one item at a time and are normally consumed once. This reduces memory use, but it does not automatically make computation faster.
+Generators are lazy: they produce one item at a time and are normally consumed once. This reduces memory use, but it
+does not automatically make computation faster.
 
 ## Useful built-ins
 
@@ -42,7 +47,8 @@ has_error = any(result.failed for result in results)
 all_ready = all(worker.ready for worker in workers)
 ```
 
-Other common tools include `min`, `max`, `sum`, `reversed`, `map`, and `filter`. Comprehensions are often clearer than `map` and `filter` when a lambda would be required.
+Other common tools include `min`, `max`, `sum`, `reversed`, `map`, and `filter`. Comprehensions are often clearer than
+`map` and `filter` when a lambda would be required.
 
 ## Standard-library iteration tools
 
@@ -70,15 +76,18 @@ A decorator receives a callable and returns a replacement callable. Preserve met
 ```python { .python-runner title="Decorator experiment" }
 from functools import wraps
 
+
 def trace(function):
     @wraps(function)
     def wrapper(*args, **kwargs):
         print(f"calling {function.__name__}")
         return function(*args, **kwargs)
+
     return wrapper
 ```
 
-Decorators are useful for cross-cutting behavior such as caching, registration, authorization, and instrumentation. Keep business logic visible rather than stacking opaque decorators.
+Decorators are useful for cross-cutting behavior such as caching, registration, authorization, and instrumentation. Keep
+business logic visible rather than stacking opaque decorators.
 
 ## Context managers
 
@@ -95,6 +104,7 @@ Create one from a generator when needed:
 
 ```python
 from contextlib import contextmanager
+
 
 @contextmanager
 def transaction(connection):
@@ -119,6 +129,7 @@ def matching_squares(limit, divisor):
         square = number ** 2
         if square % divisor == 0:
             yield square
+
 
 values = matching_squares(1_000_000, 3)
 print("first five:", list(islice(values, 5)))

@@ -1,6 +1,7 @@
 # Interactive GUI widgets in Jupyter
 
-`ipywidgets` adds interactive controls to Jupyter notebooks. It is best suited to exploratory tools, teaching interfaces, and small data dashboards—not desktop applications or public web applications.
+`ipywidgets` adds interactive controls to Jupyter notebooks. It is best suited to exploratory tools, teaching
+interfaces, and small data dashboards—not desktop applications or public web applications.
 
 ## Setup
 
@@ -11,9 +12,11 @@ python -m pip install -r requirements.txt
 jupyter lab
 ```
 
-A widget has Python-side state synchronized with a browser view. Displaying and interacting with widgets therefore requires a live notebook kernel.
+A widget has Python-side state synchronized with a browser view. Displaying and interacting with widgets therefore
+requires a live notebook kernel.
 
-You can also use the <a href="../../lab/lab/index.html?path=GUI_Widgets.ipynb">static browser lab</a> without installing Python locally.
+You can also use the <a href="../../lab/lab/index.html?path=GUI_Widgets.ipynb">static browser lab</a> without installing
+Python locally.
 
 ## Automatic controls with `interact`
 
@@ -21,6 +24,7 @@ You can also use the <a href="../../lab/lab/index.html?path=GUI_Widgets.ipynb">s
 
 ```python
 from ipywidgets import fixed, interact
+
 
 @interact(count=(0, 20, 1), uppercase=False, text="Python")
 def preview(count: int, uppercase: bool, text: str) -> str:
@@ -30,16 +34,16 @@ def preview(count: int, uppercase: bool, text: str) -> str:
 
 Common abbreviations are:
 
-| Value | Generated control |
-|---|---|
-| `True` or `False` | Checkbox |
-| Integer | Integer slider |
-| Float | Float slider |
-| String | Text box |
-| List | Dropdown using the list values |
-| Dictionary | Dropdown using labels and values |
-| `(minimum, maximum, step)` | Bounded slider |
-| `fixed(value)` | Argument with no visible control |
+| Value                      | Generated control                |
+|----------------------------|----------------------------------|
+| `True` or `False`          | Checkbox                         |
+| Integer                    | Integer slider                   |
+| Float                      | Float slider                     |
+| String                     | Text box                         |
+| List                       | Dropdown using the list values   |
+| Dictionary                 | Dropdown using labels and values |
+| `(minimum, maximum, step)` | Bounded slider                   |
+| `fixed(value)`             | Argument with no visible control |
 
 Use `interactive` when you need the resulting container, its child controls, or its latest result.
 
@@ -74,7 +78,8 @@ category = widgets.Dropdown(
 notes = widgets.Textarea(description="Notes")
 ```
 
-Useful controls include `IntSlider`, `FloatSlider`, `Text`, `Textarea`, `Checkbox`, `Dropdown`, `RadioButtons`, `SelectMultiple`, `Button`, `DatePicker`, `FileUpload`, and `Output`.
+Useful controls include `IntSlider`, `FloatSlider`, `Text`, `Textarea`, `Checkbox`, `Dropdown`, `RadioButtons`,
+`SelectMultiple`, `Button`, `DatePicker`, `FileUpload`, and `Output`.
 
 ## Observe state changes
 
@@ -94,7 +99,8 @@ quantity.observe(show_quantity, names="value")
 widgets.VBox([quantity, output])
 ```
 
-An observer receives a change dictionary containing keys such as `name`, `old`, `new`, and `owner`. Restrict observation with `names="value"` to avoid responding to unrelated changes.
+An observer receives a change dictionary containing keys such as `name`, `old`, `new`, and `owner`. Restrict observation
+with `names="value"` to avoid responding to unrelated changes.
 
 ## Handle button clicks
 
@@ -113,7 +119,8 @@ submit.on_click(submit_form)
 widgets.VBox([quantity, category, notes, submit, status])
 ```
 
-Write output inside an `Output` widget so repeated interactions update a predictable region instead of filling the notebook with cells.
+Write output inside an `Output` widget so repeated interactions update a predictable region instead of filling the
+notebook with cells.
 
 ## Layout and composition
 
@@ -133,7 +140,8 @@ form = widgets.VBox(
 form
 ```
 
-Use the `layout` attribute for dimensions and positioning and the `style` attribute for widget-specific presentation. Keep styling modest so the interface remains usable across notebook themes.
+Use the `layout` attribute for dimensions and positioning and the `style` attribute for widget-specific presentation.
+Keep styling modest so the interface remains usable across notebook themes.
 
 ## Link widget values
 
@@ -144,7 +152,8 @@ link = widgets.link((slider, "value"), (progress, "value"))
 widgets.VBox([slider, progress])
 ```
 
-Call `link.unlink()` when the synchronization is no longer needed. `jslink` performs synchronization in the browser and can remain responsive when the kernel is busy.
+Call `link.unlink()` when the synchronization is no longer needed. `jslink` performs synchronization in the browser and
+can remain responsive when the kernel is busy.
 
 ## Reusable composite widgets
 
@@ -163,7 +172,8 @@ class LabeledCounter(widgets.VBox):
         self.readout.value = f"Current value: {change['new']}"
 ```
 
-Prefer composition over building a custom browser widget. A truly custom widget requires a Python model plus a JavaScript frontend and is justified only when existing controls cannot provide the required behavior.
+Prefer composition over building a custom browser widget. A truly custom widget requires a Python model plus a
+JavaScript frontend and is justified only when existing controls cannot provide the required behavior.
 
 ## Practical guidance
 
@@ -175,10 +185,12 @@ Prefer composition over building a custom browser widget. A truly custom widget 
 
 ## Experiment: separate UI from logic
 
-The browser editor tests the ordinary Python logic that a widget callback would call. Change the validation and formatting rules, then use the full lab to render the controls.
+The browser editor tests the ordinary Python logic that a widget callback would call. Change the validation and
+formatting rules, then use the full lab to render the controls.
 
 ```python { .python-runner title="Widget application logic experiment" }
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True)
 class Order:

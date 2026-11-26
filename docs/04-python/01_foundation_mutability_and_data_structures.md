@@ -1,20 +1,22 @@
 # Foundations: values, control flow, and collections
 
-Python programs manipulate **objects**. A variable is a name bound to an object; it is not a box that permanently contains a value. This model explains assignment, mutability, function arguments, and copying.
+Python programs manipulate **objects**. A variable is a name bound to an object; it is not a box that permanently
+contains a value. This model explains assignment, mutability, function arguments, and copying.
 
 ## Basic values and types
 
-| Category | Built-in types | Typical use |
-|---|---|---|
-| Numeric | `int`, `float`, `complex` | Counts and calculations |
-| Boolean | `bool` | Conditions |
-| Text | `str` | Unicode text |
-| Sequence | `list`, `tuple`, `range` | Ordered values |
-| Mapping | `dict` | Key-value associations |
-| Set | `set`, `frozenset` | Unique values and membership |
-| Null value | `None` | Absence of a value |
+| Category   | Built-in types            | Typical use                  |
+|------------|---------------------------|------------------------------|
+| Numeric    | `int`, `float`, `complex` | Counts and calculations      |
+| Boolean    | `bool`                    | Conditions                   |
+| Text       | `str`                     | Unicode text                 |
+| Sequence   | `list`, `tuple`, `range`  | Ordered values               |
+| Mapping    | `dict`                    | Key-value associations       |
+| Set        | `set`, `frozenset`        | Unique values and membership |
+| Null value | `None`                    | Absence of a value           |
 
-Inspect a value with `type(value)`. Prefer explicit conversion—such as `int(text)`—at system boundaries rather than relying on implicit assumptions.
+Inspect a value with `type(value)`. Prefer explicit conversion—such as `int(text)`—at system boundaries rather than
+relying on implicit assumptions.
 
 ```python { .python-runner title="Basic values experiment" }
 name = "Ada"
@@ -39,16 +41,17 @@ for index, user in enumerate(users, start=1):
     print(index, user)
 ```
 
-Use `while` when repetition depends on state rather than on an iterable. `break` exits a loop, `continue` skips to its next iteration, and a loop's `else` block runs only when no `break` occurs.
+Use `while` when repetition depends on state rather than on an iterable. `break` exits a loop, `continue` skips to its
+next iteration, and a loop's `else` block runs only when no `break` occurs.
 
 ## Choosing a collection
 
-| Need | Use | Important properties |
-|---|---|---|
-| Ordered, changeable sequence | `list` | Duplicates allowed; fast append |
+| Need                               | Use     | Important properties                    |
+|------------------------------------|---------|-----------------------------------------|
+| Ordered, changeable sequence       | `list`  | Duplicates allowed; fast append         |
 | Fixed record or immutable sequence | `tuple` | Hashable when all elements are hashable |
-| Key-value lookup | `dict` | Insertion ordered; keys are unique |
-| Unique values or fast membership | `set` | Unordered; elements must be hashable |
+| Key-value lookup                   | `dict`  | Insertion ordered; keys are unique      |
+| Unique values or fast membership   | `set`   | Unordered; elements must be hashable    |
 
 ```python { .python-runner title="Collection selection experiment" }
 items = ["apple", "banana", "apple"]
@@ -60,7 +63,8 @@ For counting real data, prefer `collections.Counter` over repeatedly calling `li
 
 ## Mutability and identity
 
-`list`, `dict`, and `set` are mutable. Numbers, strings, tuples, and frozen sets are immutable. Assignment never copies an object.
+`list`, `dict`, and `set` are mutable. Numbers, strings, tuples, and frozen sets are immutable. Assignment never copies
+an object.
 
 ```python { .python-runner title="Mutability and identity experiment" }
 original = [1, 2]
@@ -89,7 +93,7 @@ def add_item(item, items=None):
 ```python
 from copy import deepcopy
 
-shallow = original.copy()      # nested objects remain shared
+shallow = original.copy()  # nested objects remain shared
 independent = deepcopy(original)
 ```
 

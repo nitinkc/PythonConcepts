@@ -1,7 +1,9 @@
 # ⚡ FastAPI Boot Camp — Part 1: Core Concepts
-### Routing, Path & Query Params, Request & Response Models
 
-> **Goal:** Understand how FastAPI receives requests, validates input, and sends structured responses — the backbone of every API you'll build or debug.
+### Path & Query Params, Request & Response Models
+
+> **Goal:** Understand how FastAPI receives requests, validates input, and sends structured responses — the backbone of
+> every API you'll build or debug.
 
 ---
 
@@ -9,27 +11,27 @@
 
 Before diving in, internalize the three things that separate FastAPI from Flask/Django REST:
 
-| Feature | FastAPI | Flask |
-|---|---|---|
-| Type hints = validation | ✅ Automatic via Pydantic | ❌ Manual |
-| Auto docs (Swagger UI) | ✅ `/docs` out of the box | ❌ Needs extension |
-| Async support | ✅ Native `async/await` | ⚠️ Limited |
-| Speed | ⚡ ~3× faster than Flask | Slower |
+| Feature                 | FastAPI                   | Flask              |
+|-------------------------|---------------------------|--------------------|
+| Type hints = validation | ✅ Automatic via Pydantic | ❌ Manual          |
+| Auto docs (Swagger UI)  | ✅ `/docs` out of the box | ❌ Needs extension |
+| Async support           | ✅ Native `async/await`   | ⚠️ Limited         |
+| Speed                   | ⚡ ~3× faster than Flask  | Slower             |
 
 ```python
-# The minimal 05-FastAPI app
-from fastapi import FastAPI
-
+# The minimal FastAPI app
+from fastapi import FastAPI  # Pulls FastAPI class,
 app = FastAPI()
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}  # 05-FastAPI auto-serializes dicts to JSON
+    return {"message": "Hello World"}  # FastAPI auto-serializes dicts to JSON
 ```
 
 Run it:
+
 ```bash
-uvicorn main:app --reload   # main = filename, app = 05-FastAPI() instance
+uvicorn main:app --reload   # main = filename, app = FastAPI() instance
 # Visit http://127.0.0.1:8000/docs  ← free Swagger UI
 ```
 
@@ -41,30 +43,28 @@ Values embedded directly in the URL path.
 
 ```python
 from fastapi import FastAPI
-
 app = FastAPI()
 
-# {item_id} is a path parameter — 05-FastAPI extracts and casts it automatically
+# {item_id} is a path parameter — FastAPI extracts and casts it automatically
 @app.get("/items/{item_id}")
-def get_item(item_id: int):   # ← type hint does the validation
+def get_item(item_id: int):  # ← type hint does the validation
     return {"item_id": item_id}
 
 # GET /items/42   → {"item_id": 42}     ✓
-# GET /items/abc  → 422 Unprocessable Entity  ← 05-FastAPI rejects invalid type automatically
+# GET /items/abc  → 422 Unprocessable Entity  ← FastAPI rejects invalid type automatically
 ```
 
-### Order matters — fixed paths before parameterized ones
+### Order matters — **fixed paths** BEFORE parameterized ones
 
 ```python
 # ✅ CORRECT ORDER
-@app.get("/users/me")        # matched first — specific
+@app.get("/users/me")  # matched first — specific
 def get_current_user():
     return {"user": "current_user"}
 
 @app.get("/users/{user_id}")  # matched second — parameterized
 def get_user(user_id: int):
     return {"user_id": user_id}
-
 
 # ❌ WRONG ORDER — /users/me would try to cast "me" as int → 422 error
 @app.get("/users/{user_id}")  # this would catch /users/me first
@@ -95,7 +95,8 @@ def get_model(model_name: ModelName):
 
 ## 3. Query Parameters
 
-Key-value pairs after the `?` in the URL. Any function parameter that isn't a path parameter is treated as a query parameter.
+Key-value pairs after the `?` in the URL. Any function parameter that isn't a path parameter is treated as a query
+parameter.
 
 ```python
 @app.get("/items/")
@@ -111,6 +112,7 @@ def list_items(skip: int = 0, limit: int = 10):
 
 ```python
 from typing import Optional
+
 
 @app.get("/items/{item_id}")
 def get_item(item_id: int, q: Optional[str] = None, short: bool = False):
@@ -132,11 +134,12 @@ def get_item(item_id: int, q: Optional[str] = None, short: bool = False):
 ```python
 from fastapi import Query
 
+
 @app.get("/search/")
 def search(
-    q: str = Query(min_length=3, max_length=50, description="Search query string"),
-    page: int = Query(default=1, ge=1, description="Page number, starting at 1"),
-    size: int = Query(default=10, ge=1, le=100),
+        q: str = Query(min_length=3, max_length=50, description="Search query string"),
+        page: int = Query(default=1, ge=1, description="Page number, starting at 1"),
+        size: int = Query(default=10, ge=1, le=100),
 ):
     return {"q": q, "page": page, "size": size}
 
@@ -155,18 +158,21 @@ For POST/PUT/PATCH — structured data sent in the request body. This is where P
 from pydantic import BaseModel
 from typing import Optional
 
+
 class Item(BaseModel):
     name: str
     price: float
-    is_offer: bool = False           # optional with default
+    is_offer: bool = False  # optional with default
     description: Optional[str] = None  # truly optional, can be None
 
+
 @app.post("/items/")
-def create_item(item: Item):          # 05-FastAPI reads body, validates, and passes typed object
+def create_item(item: Item):  # FastAPI reads body, validates, and passes typed object
     return {"item_name": item.name, "item_price": item.price}
 ```
 
 **Request body (JSON):**
+
 ```json
 {
   "name": "Widget",
@@ -176,6 +182,7 @@ def create_item(item: Item):          # 05-FastAPI reads body, validates, and pa
 ```
 
 **What Pydantic does automatically:**
+
 - Parses JSON → Python object
 - Validates types (e.g., `"price": "not_a_number"` → 422 error with helpful message)
 - Sets defaults for missing optional fields
@@ -205,29 +212,34 @@ Use `response_model` to declare the shape of the response. FastAPI will filter a
 class UserIn(BaseModel):
     username: str
     email: str
-    password: str           # received in request
+    password: str  # received in request
+
 
 class UserOut(BaseModel):
     username: str
     email: str
     # NO password field — it won't appear in the response
 
+
 @app.post("/users/", response_model=UserOut)  # ← strips password from output
 def create_user(user: UserIn):
-    # Even if we return the full user object, 05-FastAPI only outputs UserOut fields
-    return user   # password is filtered out automatically ✓
+    # Even if we return the full user object, FastAPI only outputs UserOut fields
+    return user  # password is filtered out automatically ✓
 ```
 
-> **Interview line:** *"I use `response_model` to decouple input schema from output schema — it's the clean way to avoid accidentally leaking fields like passwords or internal IDs."*
+> **Interview line:** *"I use `response_model` to decouple input schema from output schema — it's the clean way to avoid
+> accidentally leaking fields like passwords or internal IDs."*
 
 ### Response status codes
 
 ```python
 from fastapi import status
 
-@app.post("/items/", status_code=status.HTTP_201_CREATED)   # 201 not 200
+
+@app.post("/items/", status_code=status.HTTP_201_CREATED)  # 201 not 200
 def create_item(item: Item):
     return item
+
 
 @app.delete("/items/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_item(item_id: int):
@@ -241,10 +253,11 @@ def delete_item(item_id: int):
 ```python
 from fastapi import Path
 
+
 @app.get("/items/{item_id}")
 def get_item(
-    item_id: int = Path(ge=1, le=1000, description="Item ID between 1 and 1000"),
-    q: Optional[str] = None
+        item_id: int = Path(ge=1, le=1000, description="Item ID between 1 and 1000"),
+        q: Optional[str] = None
 ):
     return {"item_id": item_id}
 

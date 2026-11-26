@@ -1,6 +1,7 @@
 # Functions, scope, and modules
 
-Functions turn behavior into reusable units. Good functions have a clear contract, focused responsibility, predictable return value, and explicit dependencies.
+Functions turn behavior into reusable units. Good functions have a clear contract, focused responsibility, predictable
+return value, and explicit dependencies.
 
 ## Defining a function
 
@@ -10,17 +11,20 @@ def calculate_total(price: float, quantity: int = 1, *, tax: float = 0.0) -> flo
     subtotal = price * quantity
     return subtotal * (1 + tax)
 
+
 calculate_total(10, 2, tax=0.08)
 ```
 
-Parameters before `/` are positional-only; parameters after `*` are keyword-only. Defaults belong after required parameters.
+Parameters before `/` are positional-only; parameters after `*` are keyword-only. Defaults belong after required
+parameters.
 
 ```python { .python-runner title="Parameter kinds experiment" }
 def connect(host, /, port=5432, *, timeout=5):
     ...
 ```
 
-Use `*args` for extra positional arguments and `**kwargs` for extra keyword arguments when the API genuinely needs flexibility—not as a substitute for a clear signature.
+Use `*args` for extra positional arguments and `**kwargs` for extra keyword arguments when the API genuinely needs
+flexibility—not as a substitute for a clear signature.
 
 ## Return values
 
@@ -30,10 +34,12 @@ A function without `return` returns `None`. Returning several comma-separated va
 def bounds(values):
     return min(values), max(values)
 
+
 lowest, highest = bounds([4, 1, 9])
 ```
 
-Avoid mixing incompatible return shapes such as a dictionary on success and `False` on failure. Raise an exception or consistently return an optional value.
+Avoid mixing incompatible return shapes such as a dictionary on success and `False` on failure. Raise an exception or
+consistently return an optional value.
 
 ## Scope and closures
 
@@ -43,12 +49,15 @@ Python resolves names using **LEGB**: Local, Enclosing, Global, Built-in.
 def make_multiplier(factor):
     def multiply(value):
         return value * factor
+
     return multiply
+
 
 double = make_multiplier(2)
 ```
 
-Use `nonlocal` to rebind an enclosing function's name and `global` to rebind a module-level name. Both should be rare; passing values and returning results is usually clearer.
+Use `nonlocal` to rebind an enclosing function's name and `global` to rebind a module-level name. Both should be rare;
+passing values and returning results is usually clearer.
 
 ## First-class functions
 
@@ -58,7 +67,8 @@ Functions can be stored, passed, and returned like other objects.
 def apply(values, operation):
     return [operation(value) for value in values]
 
-squares = apply([1, 2, 3], lambda value: value**2)
+
+squares = apply([1, 2, 3], lambda value: value ** 2)
 ```
 
 Prefer `operator`, named functions, or comprehensions when they communicate intent better than a complex `lambda`.
@@ -72,13 +82,15 @@ from pathlib import Path
 from statistics import mean
 ```
 
-Imports execute a module once per interpreter process and cache it in `sys.modules`. Keep import-time behavior lightweight.
+Imports execute a module once per interpreter process and cache it in `sys.modules`. Keep import-time behavior
+lightweight.
 
 ### The main guard
 
 ```python { .python-runner title="Main guard experiment" }
 def main() -> None:
     print("Run application")
+
 
 if __name__ == "__main__":
     main()
@@ -101,6 +113,7 @@ Type hints document expected values and enable static analysis, but Python does 
 ```python { .python-runner title="Typed function contract experiment" }
 from collections.abc import Iterable
 
+
 def average(values: Iterable[float]) -> float:
     data = list(values)
     if not data:
@@ -110,13 +123,16 @@ def average(values: Iterable[float]) -> float:
 
 ## Experiment: signatures and closures
 
-Change `factor`, add another keyword-only option, or remove the default argument from the lambda to observe late binding.
+Change `factor`, add another keyword-only option, or remove the default argument from the lambda to observe late
+binding.
 
 ```python { .python-runner title="Functions and closures experiment" }
 def make_transform(factor, *, offset=0):
     def transform(value):
         return value * factor + offset
+
     return transform
+
 
 triple_plus_one = make_transform(3, offset=1)
 print([triple_plus_one(value) for value in range(5)])

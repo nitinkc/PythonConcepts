@@ -1,10 +1,12 @@
 # Senior Python: production async and concurrency
 
-Production concurrency is a resource-management problem. Correct code defines ownership, limits, failure propagation, cancellation, and shutdown—not only task creation.
+Production concurrency is a resource-management problem. Correct code defines ownership, limits, failure propagation,
+cancellation, and shutdown—not only task creation.
 
-## Structured concurrency
+## Structured concurrency **[FDE]**
 
-`TaskGroup` gives related tasks a shared lifetime. If one child fails, siblings are cancelled and failures are reported together.
+`TaskGroup` gives related tasks a shared lifetime. If one child fails, siblings are cancelled and failures are reported
+together.
 
 ```python { .python-runner title="TaskGroup failure experiment" }
 import asyncio
@@ -31,7 +33,8 @@ async def main():
 await main()
 ```
 
-Do not create orphan tasks whose exceptions and lifetime nobody owns. Retain task references and define shutdown behavior for legitimate background work.
+Do not create orphan tasks whose exceptions and lifetime nobody owns. Retain task references and define shutdown
+behavior for legitimate background work.
 
 ## Bounded concurrency and backpressure
 
@@ -62,13 +65,16 @@ Choose limits from downstream capacity, connection pools, memory, and latency—
 
 ## Timeouts and cancellation
 
-Use `asyncio.timeout` around a meaningful operation boundary. Cancellation is normal control flow: use `finally` for cleanup and usually re-raise `CancelledError` rather than suppressing it.
+Use `asyncio.timeout` around a meaningful operation boundary. Cancellation is normal control flow: use `finally` for
+cleanup and usually re-raise `CancelledError` rather than suppressing it.
 
-Shielding prevents caller cancellation from stopping work and should be rare. It changes ownership and can leave work running after its requester is gone.
+Shielding prevents caller cancellation from stopping work and should be rare. It changes ownership and can leave work
+running after its requester is gone.
 
 ## Async iterators and context managers
 
-An async iterator awaits between values through `__aiter__` and `__anext__`. An async generator provides the same protocol with `async def` and `yield`.
+An async iterator awaits between values through `__aiter__` and `__anext__`. An async generator provides the same
+protocol with `async def` and `yield`.
 
 ```python
 async def pages(client):
@@ -82,11 +88,13 @@ async def pages(client):
             break
 ```
 
-An async context manager pairs awaited acquisition and cleanup. Use `contextlib.asynccontextmanager` for concise resource scopes.
+An async context manager pairs awaited acquisition and cleanup. Use `contextlib.asynccontextmanager` for concise
+resource scopes.
 
 ## Request-local state with `contextvars`
 
-Thread-local storage is insufficient when many coroutines share a thread. A `ContextVar` provides task-local context that child tasks normally inherit.
+Thread-local storage is insufficient when many coroutines share a thread. A `ContextVar` provides task-local context
+that child tasks normally inherit.
 
 ```python
 from contextvars import ContextVar
@@ -99,17 +107,21 @@ finally:
     request_id.reset(token)
 ```
 
-Use explicit parameters for core domain data. Context variables suit cross-cutting request metadata such as trace identifiers.
+Use explicit parameters for core domain data. Context variables suit cross-cutting request metadata such as trace
+identifiers.
 
 ## Threads and processes
 
-Use threads for synchronous blocking I/O and native operations that release the GIL. Protect shared invariants with locks or, preferably, single ownership and message passing.
+Use threads for synchronous blocking I/O and native operations that release the GIL. Protect shared invariants with
+locks or, preferably, single ownership and message passing.
 
-Use processes for substantial independent CPU work. Account for startup, serialization, copied memory, worker crashes, and platform-specific process creation. Send compact immutable inputs rather than a large object graph.
+Use processes for substantial independent CPU work. Account for startup, serialization, copied memory, worker crashes,
+and platform-specific process creation. Send compact immutable inputs rather than a large object graph.
 
 ## Retry design
 
-Retry only failures likely to be transient. Require idempotency for operations with side effects, cap attempts and elapsed time, use exponential backoff with jitter, and emit retry metrics.
+Retry only failures likely to be transient. Require idempotency for operations with side effects, cap attempts and
+elapsed time, use exponential backoff with jitter, and emit retry metrics.
 
 Do not layer uncoordinated retries across clients, services, and workers: multiplicative retries can amplify an outage.
 
@@ -124,7 +136,9 @@ Do not layer uncoordinated retries across clients, services, and workers: multip
 
 ## Free-threaded Python
 
-Newer CPython builds may run without the traditional GIL. This can improve CPU parallelism for compatible workloads, but extension compatibility, synchronization costs, and application race conditions still matter. Never use the GIL as an application lock.
+Newer CPython builds may run without the traditional GIL. This can improve CPU parallelism for compatible workloads, but
+extension compatibility, synchronization costs, and application race conditions still matter. Never use the GIL as an
+application lock.
 
 ## Interview checkpoints
 

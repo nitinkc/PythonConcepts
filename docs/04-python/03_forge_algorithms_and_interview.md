@@ -1,19 +1,21 @@
 # Algorithms and problem solving
 
-Algorithmic thinking is the ability to define a contract, select a suitable data structure, reason about cost, and verify edge cases. Optimize only after establishing a correct baseline.
+Algorithmic thinking is the ability to define a contract, select a suitable data structure, reason about cost, and
+verify edge cases. Optimize only after establishing a correct baseline.
 
 ## Complexity
 
-| Complexity | Typical example |
-|---|---|
-| `O(1)` | Dictionary lookup; list index |
-| `O(log n)` | Binary search in sorted data |
-| `O(n)` | One pass over input |
-| `O(n log n)` | Comparison sorting |
-| `O(n²)` | Comparing every pair |
-| `O(2ⁿ)` | Enumerating all subsets |
+| Complexity   | Typical example               |
+|--------------|-------------------------------|
+| `O(1)`       | Dictionary lookup; list index |
+| `O(log n)`   | Binary search in sorted data  |
+| `O(n)`       | One pass over input           |
+| `O(n log n)` | Comparison sorting            |
+| `O(n²)`      | Comparing every pair          |
+| `O(2ⁿ)`      | Enumerating all subsets       |
 
-State both time and auxiliary space complexity. Built-in operations still have costs: slicing copies values, `x in list` is linear, and `x in set` is constant-time on average.
+State both time and auxiliary space complexity. Built-in operations still have costs: slicing copies values, `x in list`
+is linear, and `x in set` is constant-time on average.
 
 ## A repeatable method
 
@@ -93,10 +95,12 @@ def binary_search(values: list[int], target: int) -> int | None:
 
 ## Breadth-first and depth-first search
 
-Use breadth-first search for shortest paths in an unweighted graph and level-order traversal. Use depth-first search for exhaustive traversal, reachability, and backtracking.
+Use breadth-first search for shortest paths in an unweighted graph and level-order traversal. Use depth-first search for
+exhaustive traversal, reachability, and backtracking.
 
 ```python { .python-runner title="Breadth-first traversal experiment" }
 from collections import deque
+
 
 def breadth_first(graph, start):
     queue = deque([start])
@@ -142,6 +146,7 @@ def two_sum_hash(numbers, target):
             return (seen[complement], index), index + 1
         seen[number] = index
     return None, len(numbers)
+
 
 values = list(range(1_000))
 target = 1_997

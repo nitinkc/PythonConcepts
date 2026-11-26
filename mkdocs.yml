@@ -10,13 +10,15 @@ theme:
     previous: fontawesome/solid/angle-left
     next: fontawesome/solid/angle-right
   palette:
-    - scheme: default
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
       primary: brown
       accent: brown
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-    - scheme: slate
+    - media: "(prefers-color-scheme: light)"
+      scheme: slate
       primary: brown
       accent: brown
       toggle:
@@ -25,9 +27,10 @@ theme:
   features:
     # Navigation
     - navigation.instant
+    - navigation.tracking
     - navigation.tabs
     - navigation.indexes
-#    - navigation.tabs.sticky
+    #    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.indexes      # section landing pages (quiz/, sessions/)
@@ -35,7 +38,6 @@ theme:
     - navigation.top           # Back-to-top button
     - navigation.footer        # Prev/Next page links
     # navigation.instant disabled — breaks live reload (re-enable for production builds)
-    # - navigation.instant
     # - navigation.instant.progress
     # Search
     - search.suggest
@@ -47,6 +49,8 @@ theme:
     - content.code.annotate    # (1) style code annotations
     - content.tabs.link        # Sync tabs across page
     - content.tooltips
+    # TOC
+#    - toc.integrate
 
 plugins:
   - search
@@ -88,7 +92,9 @@ extra_css:
   - css/python-runner.css
 
 nav:
-  - Home: index.md
+  - Home:
+      - Home: "index.md"
+      - Installation: "installation.md"
   - Quick Reference: "reference/python-quick-reference.md"
   - Learn Python:
       - 1. Foundations: "04-python/01_foundation_mutability_and_data_structures.md"
@@ -104,17 +110,15 @@ nav:
           - 10. Advanced Typing and APIs: "04-python/09_advanced_typing_and_api_design.md"
           - 11. Production Async: "04-python/10_production_async_and_concurrency.md"
           - 12. Production Engineering: "04-python/11_production_engineering.md"
-  - Build APIs:
+      - Advanced Python: "04-python/advanced-python.md"
+  - Fast APIs:
       - 1. Routing and Models: "05-FastAPI/01_fastapi_core_routing_and_models.md"
       - 2. Validation and Dependencies: "05-FastAPI/02_fastapi_pydantic_errors_deps.md"
       - 3. Production Patterns: "05-FastAPI/03_fastapi_async_routers_production.md"
+      - cheatsheet: "05-FastAPI/cheatsheet.md"
   - Interview Preparation:
       - Rapid Guide: "interview/index.md"
-      - Advanced Python: "interview/advanced-python.md"
       - Senior Quizzes: "interview/quizzes.md"
-  - Run Python: playground.md
 
-exclude_docs: |
+exclude_docs:
   _abbreviations.md
-  03-mini-projects/code/**/README.md
-
