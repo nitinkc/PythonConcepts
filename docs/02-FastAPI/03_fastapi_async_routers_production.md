@@ -91,16 +91,13 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-
 @router.get("/")  # Full path: GET /items/
 def list_items():
     return [{"name": "Widget"}, {"name": "Gadget"}]
 
-
 @router.get("/{item_id}")  # Full path: GET /items/{item_id}
 def get_item(item_id: int):
     return {"item_id": item_id}
-
 
 @router.post("/")  # Full path: POST /items/
 def create_item():
@@ -132,7 +129,6 @@ Middleware runs on every request/response. Use for logging, timing, CORS, auth h
 import time
 from fastapi import Request
 
-
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
     start = time.time()
@@ -144,14 +140,31 @@ async def add_process_time_header(request: Request, call_next):
 
 ### CORS Middleware — almost always needed
 
-`allow_origins` configures **Cross-Origin Resource Sharing (CORS)**—a **browser security policy**, not a server firewall or port blocker. That is why your FastAPI server still runs on port `8081` (or `8001`) and responds to requests from `curl`, Postman, Python clients, or direct browser navigation even if an origin is not listed.
+```python
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://myapp.com", "http://localhost:3000"],  # or ["*"] for dev
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+```
+
+`allow_origins` configures **Cross-Origin Resource Sharing (CORS)**—a **browser security policy**, 
+not a server firewall or port blocker. That is why your FastAPI server still runs on port `8081` (or `8001`) and 
+responds to requests from `curl`, Postman, Python clients, or direct browser navigation even if an origin is not listed.
+
 
 ### What `allow_origins` Actually Controls
 
-An **origin** is the combination of **scheme + host + port** (for example, `http://localhost:3000` is a different origin from `http://localhost:8081` or `[https://myapp.com](https://myapp.com)`).
+An **origin** is the combination of **scheme + host + port** (for example, `http://localhost:3000`).
 
-1. **Browser-enforced rule:** When frontend JavaScript running on `http://localhost:5173` calls your FastAPI backend on `http://localhost:8081` via `fetch` or `axios`, the browser treats that as a cross-origin request.
-2. **Preflight and response headers:** For cross-origin requests, the browser checks the `Access-Control-Allow-Origin` response header sent by FastAPI (`CORSMiddleware`):
+1. **Browser-enforced rule:** When frontend JavaScript running on `http://localhost:5173` **calls** your FastAPI backend
+  on `http://localhost:8081` via `fetch` or `axios`, the browser treats that as a cross-origin request.
+2. **Preflight and response headers:** For cross-origin requests, the browser checks the `Access-Control-Allow-Origin` 
+  response header sent by FastAPI (`CORSMiddleware`):
 * If the calling page's origin is in `allow_origins`, FastAPI echoes that origin in `Access-Control-Allow-Origin`, and the browser lets the frontend JavaScript read the response.
 * If the calling page's origin is **not** in `allow_origins`, FastAPI omits/rejects that header—the server may still compute/return the response, but **the browser blocks the frontend code from reading it** (raising a CORS error in DevTools).
 
@@ -167,17 +180,6 @@ An **origin** is the combination of **scheme + host + port** (for example, `http
 * **Watch out with `allow_credentials=True`:** If you set `allow_credentials=True` (for cookies or `Authorization` headers), browsers reject `Access-Control-Allow-Origin: *`—explicitly list allowed origins instead.
 * **Keep `["*"]` strictly to local dev/testing:** Using `["*"]` allows any website's browser script to call your API if that origin is not blocked elsewhere.
 
-```python
-from fastapi.middleware.cors import CORSMiddleware
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["https://myapp.com", "http://localhost:3000"],  # or ["*"] for dev
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-```
 
 > **Interview tip:** If asked "how do you handle CORS?", say: *"I add `CORSMiddleware` with explicit origin allowlists
 > in production — never `*` in production if credentials are involved."*
@@ -191,8 +193,7 @@ For initializing DB pools, loading ML models, connecting to message queues.
 ```python
 from contextlib import asynccontextmanager
 
-
-# Modern approach (05-FastAPI 0.93+)
+# Modern approach (02-FastAPI 0.93+)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # STARTUP: runs before the app starts serving requests
@@ -205,7 +206,6 @@ async def lifespan(app: FastAPI):
     # SHUTDOWN: runs when the app is stopping
     print("Shutting down...")
     await db_pool.disconnect()
-
 
 app = FastAPI(lifespan=lifespan)
 ```
@@ -230,7 +230,6 @@ from fastapi.responses import (
 def get_page():
     return "<html><body><h1>Hello</h1></body></html>"
 
-
 # File download
 @app.get("/download/{filename}")
 def download_file(filename: str):
@@ -240,16 +239,13 @@ def download_file(filename: str):
         filename=filename  # sets Content-Disposition header
     )
 
-
 # Streaming — for large files or real-time data
 import io
-
 
 def generate_csv():
     yield "id,name,price\n"
     for item in get_all_items():  # doesn't load all into memory
         yield f"{item.id},{item.name},{item.price}\n"
-
 
 @app.get("/export/csv")
 def export_csv():
@@ -258,7 +254,6 @@ def export_csv():
         media_type="text/csv",
         headers={"Content-Disposition": "attachment; filename=export.csv"}
     )
-
 
 # Redirect
 @app.get("/old-path")
@@ -279,12 +274,10 @@ from fastapi import Security
 API_KEY = "secret-key-from-env"
 api_key_header = APIKeyHeader(name="X-API-Key")
 
-
 def verify_api_key(api_key: str = Security(api_key_header)):
     if api_key != API_KEY:
         raise HTTPException(status_code=403, detail="Invalid API key")
     return api_key
-
 
 @app.get("/protected/", dependencies=[Depends(verify_api_key)])
 def protected_route():
@@ -294,13 +287,12 @@ def protected_route():
 ### JWT Bearer token (common pattern)
 
 ```python
-from jose import jwt, JWTError  # pip install 04-python-jose
+from jose import jwt, JWTError  # pip install 01-python-jose
 from fastapi.security import OAuth2PasswordBearer
 
 SECRET_KEY = "your-secret"
 ALGORITHM = "HS256"
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
-
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -332,22 +324,18 @@ from main import app
 
 client = TestClient(app)
 
-
 def test_get_item():
     response = client.get("/items/1")
     assert response.status_code == 200
     assert response.json() == {"item_id": 1}
 
-
 def test_item_not_found():
     response = client.get("/items/9999")
     assert response.status_code == 404
 
-
 def test_create_item_validation_error():
     response = client.post("/items/", json={"price": -1})  # missing name, invalid price
     assert response.status_code == 422
-
 
 def test_create_item():
     response = client.post("/items/", json={"name": "Widget", "price": 9.99})

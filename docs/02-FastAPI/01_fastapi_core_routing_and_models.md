@@ -32,6 +32,9 @@ Run it:
 
 ```bash
 uvicorn main:app --reload   # main = filename, app = FastAPI() instance
+# Or
+uv run fastApiDemo dev --port 8001
+
 # Visit http://127.0.0.1:8000/docs  ← free Swagger UI
 ```
 

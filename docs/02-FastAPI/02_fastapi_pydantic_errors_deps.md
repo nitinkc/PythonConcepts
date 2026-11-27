@@ -89,7 +89,7 @@ class Address(BaseModel):
 class Customer(BaseModel):
     name: str
     email: str
-    address: Address  # nested model — 05-FastAPI handles the nested JSON automatically
+    address: Address  # nested model — 02-FastAPI handles the nested JSON automatically
     tags: List[str] = []  # list of strings
 
 # Request body:

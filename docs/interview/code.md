@@ -1,4 +1,3 @@
-
 ## Route Shadowing
 
 In FastAPI,  does this code gves an error or runs without issues. what would be printed?
@@ -27,6 +26,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 ```
+
+## Exception vs Validation
 
 When a Validation occurs, does it throw and exceotuon or Error
 - Is it 422 Validation Exception 
@@ -62,4 +63,7 @@ async def invalid_product_id_handler(request: Request, exc: InvalidProductIdExce
         },
     )
 ```
+
+How to run a script before start-up
+
 

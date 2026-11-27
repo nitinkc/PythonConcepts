@@ -132,4 +132,4 @@ Quantify impact where possible, but do not invent precision.
 - Analyze unfamiliar code for complexity, resource lifetime, and failure behavior.
 - Design a typed, observable, testable service and defend its boundaries.
 - Communicate alternatives and evidence instead of only naming tools.
-- Complete the [advanced Python guide](../04-python/advanced-python.md) and [senior quizzes](quizzes.md).
+- Complete the [advanced Python guide](../01-python/advanced-python.md) and [senior quizzes](quizzes.md).

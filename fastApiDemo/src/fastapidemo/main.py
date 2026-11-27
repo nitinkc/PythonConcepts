@@ -1,8 +1,11 @@
 from fastapi import FastAPI
+
+from fastapidemo.events.lifeCycleEvents import lifespan
 from fastapidemo.models.model import ModelName
 
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+
 # These modules do `from fastapidemo.main import app` and register exception
 # handlers / middleware on it as an import side effect, so they must be
 # imported only after `app` exists.

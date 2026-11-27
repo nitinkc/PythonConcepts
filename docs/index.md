@@ -14,7 +14,7 @@ quick-reference guide.
   Start with syntax and the object model, then progress through functions, object-oriented design, iterators, testing,
   concurrency, and algorithms.
 
-  [Start learning](04-python/01_foundation_mutability_and_data_structures.md)
+  [Start learning](01-python/01_foundation_mutability_and_data_structures.md)
 
 - **Build APIs with FastAPI**
 
@@ -23,7 +23,7 @@ quick-reference guide.
   Learn routing, Pydantic validation, dependency injection, asynchronous I/O, application structure, security, and
   testing.
 
-  [Start FastAPI](05-FastAPI/01_fastapi_core_routing_and_models.md)
+  [Start FastAPI](02-FastAPI/01_fastapi_core_routing_and_models.md)
 
 - **Prepare for senior interviews**
 
