@@ -7,13 +7,13 @@ pipelines for large inputs and explicit loops when logic has side effects or sev
 
 Use comprehensions for a single transformation with an optional simple filter.
 
-```python { .python-runner title="Comprehensions experiment" }
+```python
 squares = [number ** 2 for number in range(10)]
 even_squares = {number: number ** 2 for number in range(10) if number % 2 == 0}
 letters = {word[0] for word in ["apple", "apricot", "banana"]}
 ```
 
-Do not force complex branching, exception handling, or side effects into a comprehension. A normal loop is then easier
+**Do not** force complex branching, exception handling, or side effects into a comprehension. A normal loop is then easier
 to read.
 
 ## Iterables, iterators, and generators
@@ -27,7 +27,6 @@ def read_nonempty(lines):
         text = line.strip()
         if text:
             yield text
-
 
 length_total = sum(len(line) for line in read_nonempty(source))
 ```
@@ -73,9 +72,8 @@ first_ten = list(islice(chain(source_a, source_b), 10))
 
 A decorator receives a callable and returns a replacement callable. Preserve metadata with `functools.wraps`.
 
-```python { .python-runner title="Decorator experiment" }
+```python
 from functools import wraps
-
 
 def trace(function):
     @wraps(function)
@@ -86,7 +84,7 @@ def trace(function):
     return wrapper
 ```
 
-Decorators are useful for cross-cutting behavior such as caching, registration, authorization, and instrumentation. Keep
+Decorators are useful for **cross-cutting behavior** such as caching, registration, authorization, and instrumentation. Keep
 business logic visible rather than stacking opaque decorators.
 
 ## Context managers
@@ -105,7 +103,6 @@ Create one from a generator when needed:
 ```python
 from contextlib import contextmanager
 
-
 @contextmanager
 def transaction(connection):
     try:
@@ -123,13 +120,11 @@ Change the filter, remove `islice`, or consume the generator twice and compare t
 ```python { .python-runner title="Lazy iteration experiment" }
 from itertools import islice
 
-
 def matching_squares(limit, divisor):
     for number in range(limit):
         square = number ** 2
         if square % divisor == 0:
             yield square
-
 
 values = matching_squares(1_000_000, 3)
 print("first five:", list(islice(values, 5)))

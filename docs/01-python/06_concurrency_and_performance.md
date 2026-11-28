@@ -3,6 +3,48 @@
 Choose an execution model from evidence about the workload. Concurrency improves throughput when tasks spend time
 waiting; parallelism can reduce CPU-bound processing time.
 
+The examples on this page mirror
+[`examples/concurrency/execution_models.py`](https://github.com/nitinkc/PythonConcepts/blob/main/examples/concurrency/execution_models.py),
+which drives the same three-element task list through a thread pool, a process pool, and `asyncio`.
+
+## Two kinds of workload
+
+Every concurrency decision starts by identifying what a task spends its time on.
+
+- **I/O-bound** work waits on something external: the network, disk, a database, a lock, `sleep()`. The CPU is mostly
+  idle while the task waits, so *overlapping the waits* is what matters.
+- **CPU-bound** work is busy computing: hashing, compression, parsing, numeric loops. The CPU is the bottleneck, so the
+  only way to go faster is to *use more cores*.
+
+```python
+from time import sleep
+
+def blocking_io(value: int) -> int:
+    sleep(0.01)          # I/O-bound: the thread sits idle, waiting
+    return value
+
+def cpu_bound(value: int) -> int:
+    return sum(number * number for number in range(value))  # CPU-bound: pure computation
+```
+
+## Concurrency is not parallelism
+
+- **Concurrency** is about *structure*: several tasks make progress by interleaving. Only one may be executing at any
+  instant, but while one waits, another can run.
+- **Parallelism** is about *execution*: several tasks literally run at the same instant on different CPU cores.
+
+All three models below provide concurrency. Only `ProcessPoolExecutor` provides parallelism for Python code.
+
+| Model                 | Provides    | Best for                          |
+|-----------------------|-------------|-----------------------------------|
+| `ThreadPoolExecutor`  | Concurrency | Blocking I/O calls                |
+| `asyncio`             | Concurrency | Many async-compatible I/O tasks   |
+| `ProcessPoolExecutor` | Parallelism | CPU-bound work                    |
+
+`asyncio` does **not** run tasks in parallel — it is a single thread that switches between coroutines at `await`
+points. Threads in standard CPython do not execute Python bytecode in parallel either (see the GIL below); they overlap
+only the *waiting*, not the *computing*.
+
 ## Start with measurement
 
 Do not optimize from intuition alone. Measure representative work with `timeit` for small expressions and a profiler for
@@ -17,121 +59,129 @@ print(elapsed)
 
 Prefer algorithm and data-structure improvements before micro-optimizations.
 
-## Threads
+## Threads: concurrency for blocking I/O
 
-Threads share process memory and are suitable for blocking I/O such as multiple network requests. Shared mutable state
-requires synchronization and can create race conditions.
+Threads **share process memory** and are suitable for **blocking I/O** such as multiple network requests. Shared mutable
+state requires synchronization and can create race conditions.
 
-```python { .python-runner title="Threads" }
-import asyncio
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-import hashlib
-import math
-import time
-
+```python
 from concurrent.futures import ThreadPoolExecutor
+from time import sleep
 
+def blocking_io(value: int) -> int:
+    sleep(0.01)
+    return value
 
-# 2. Several blocking I/O calls -> Thread pool
-def blocking_io_call(task_id: int) -> str:
-    time.sleep(0.2)  # Simulates a 200ms blocking network/DB call
-    return f"Result-{task_id}"
-
-
-def demo_thread_pool():
-    start = time.perf_counter()
-    # 10 blocking calls of 0.2s each -> ~0.2s total instead of 2.0s
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        results = list(executor.map(blocking_io_call, range(10)))
-    elapsed = time.perf_counter() - start
-    print(f"2. ThreadPool:   Fetched {len(results)} items | Time={elapsed:.3f}s")
-
-
-if __name__ == "__main__":
-    demo_thread_pool()
+def run_threaded(values: list[int]) -> list[int]:
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(blocking_io, values))
 ```
 
-In standard CPython, the Global Interpreter Lock generally prevents Python bytecode from executing in parallel across
-threads. Threads can still overlap I/O and native operations that release the lock.
+In standard CPython, the **Global Interpreter Lock (GIL)** prevents Python bytecode from executing in parallel across
+threads. Threads still help here because `sleep()` — like socket and file I/O — **releases the GIL while it waits**, so
+ten `blocking_io` calls finish in roughly one wait instead of ten sequential waits.
 
-## Processes
+The same pool gives no speedup on `cpu_bound`: pure Python computation holds the GIL, so threads merely take turns.
+Free-threaded CPython builds (3.13+) can remove this limit, but the standard build still has the GIL.
 
-Processes have separate memory and can execute CPU-bound Python work in parallel. Data must be serialized between
-processes, so startup and communication overhead matter.
+## Processes: parallelism for CPU-bound work
+
+Processes have **separate interpreters and separate memory**, so each has its own GIL and they execute Python code truly
+in parallel across cores.
 
 ```python
 from concurrent.futures import ProcessPoolExecutor
 
-if __name__ == "__main__":
+def cpu_bound(value: int) -> int:
+    return sum(number * number for number in range(value))
+
+def run_parallel(values: list[int]) -> list[int]:
     with ProcessPoolExecutor() as executor:
-        results = list(executor.map(calculate, inputs))
+        return list(executor.map(cpu_bound, values))
 ```
 
-The main guard is essential for portable process creation.
+Trade-offs to weigh:
 
-```python  { .python-runner title="Process" }
-import asyncio
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-import hashlib
-import math
-import time
-
-
-# 4. CPU-heavy independent tasks -> Process pool
-def cpu_heavy_task(n: int) -> str:
-    # CPU-bound cryptographic key stretching
-    return hashlib.pbkdf2_hmac("sha256", f"block-{n}".encode(), b"salt", 200_000).hex()
-
-
-def demo_process_pool():
-    start = time.perf_counter()
-    # Runs across multiple CPU cores in parallel
-    with ProcessPoolExecutor() as pool:
-        results = list(pool.map(cpu_heavy_task, range(8)))
-    elapsed = time.perf_counter() - start
-    print(f"4. ProcessPool:  Computed {len(results)} hashes | Time={elapsed:.3f}s")
-
-
-if __name__ == "__main__":
-    demo_process_pool()
-
-```
+- Arguments and results are **pickled** between processes — functions must be importable (module-level, not closures)
+  and data must be serializable. That is why `cpu_bound` is a top-level function.
+- Process startup and serialization cost real time. Parallelism only pays off when each task is expensive enough to
+  outweigh it; `sum(range(3))` would be faster sequentially.
+- The `if __name__ == "__main__":` guard is essential so child processes do not re-run the spawning code on import.
 
 ## Asynchronous I/O **[FDE]**
 
-`asyncio` coordinates many tasks cooperatively on an event loop. It is effective when libraries expose non-blocking
-APIs.
+`asyncio` runs many tasks **cooperatively on a single thread**. Each `await` is a yield point where the event loop can
+switch to another coroutine. It is effective when libraries expose non-blocking APIs, and it scales to thousands of
+waiting tasks with far less memory than a thread per task.
 
-```python { .python-runner title="Asynchronous I/O" }
+```python
 import asyncio
-from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-import hashlib
-import math
-import time
 
+async def run_async(values: list[int]) -> list[int]:
+    async def identity(value: int) -> int:
+        await asyncio.sleep(0.01)   # yields control; the loop runs other coroutines meanwhile
+        return value
 
-# 3. Many async-compatible I/O operations -> asyncio
-async def async_io_call(task_id: int) -> str:
-    await asyncio.sleep(0.2)  # Simulates a non-blocking 200ms network call
-    return f"AsyncResult-{task_id}"
-
-
-async def demo_asyncio():
-    start = time.perf_counter()
-    # 1,000 concurrent tasks on a single thread -> ~0.2s total
-    tasks = [async_io_call(i) for i in range(1_000)]
-    results = await asyncio.gather(*tasks)
-    elapsed = time.perf_counter() - start
-    print(f"3. asyncio:      Fetched {len(results)} items | Time={elapsed:.3f}s")
-
-
-if __name__ == "__main__":
-    asyncio.run(demo_asyncio())
-    
+    return list(await asyncio.gather(*(identity(value) for value in values)))
 ```
 
-An `async def` function returns a coroutine. It runs when awaited or scheduled. Blocking calls inside asynchronous code
-block the entire event loop; use an async library or deliberately offload that work.
+Key rules:
+
+- An `async def` function only **returns a coroutine** — nothing runs until it is awaited, gathered, or scheduled.
+  `asyncio.run()` starts the event loop; `asyncio.gather()` schedules the coroutines concurrently and returns results in
+  input order.
+- `asyncio.sleep()` is not `time.sleep()`. `await asyncio.sleep()` parks the coroutine and frees the loop; calling
+  `time.sleep()` inside a coroutine **blocks the entire event loop** and every task on it stalls. Offload unavoidable
+  blocking calls with `asyncio.to_thread()`.
+- Because everything shares one thread, `identity` can safely be a closure — no pickling, no locks needed for
+  coroutine-local state between `await` points.
+- Async is not a CPU-bound tool: a hot loop inside a coroutine never yields and starves the loop. CPU work belongs in a
+  process pool.
+
+## One task list, three models
+
+The complete file runs identical input through all three models. The output is the same each time — `[1, 2, 3]` —
+because the models differ in *how* the work is scheduled, not in *what* it produces:
+
+```python
+import asyncio
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
+from time import sleep
+
+def blocking_io(value: int) -> int:
+    sleep(0.01)
+    return value
+
+def cpu_bound(value: int) -> int:
+    return sum(number * number for number in range(value))
+
+def run_threaded(values: list[int]) -> list[int]:
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(blocking_io, values))
+
+def run_parallel(values: list[int]) -> list[int]:
+    with ProcessPoolExecutor() as executor:
+        return list(executor.map(cpu_bound, values))
+
+async def run_async(values: list[int]) -> list[int]:
+    async def identity(value: int) -> int:
+        await asyncio.sleep(0.01)
+        return value
+
+    return list(await asyncio.gather(*(identity(value) for value in values)))
+
+def main() -> None:
+    values = [1, 2, 3]
+    print(run_threaded(values))
+    print(run_parallel(values))
+    print(asyncio.run(run_async(values)))
+
+if __name__ == "__main__":
+    main()
+```
+
+Run it locally with `python examples/concurrency/execution_models.py`. (Thread and process pools need real OS threads
+and processes, so this file cannot run in the browser-based runner — the asyncio experiment below can.)
 
 ## Selection guide
 
@@ -141,12 +191,15 @@ block the entire event loop; use an async library or deliberately offload that w
 | Several blocking I/O calls           | Thread pool                                 |
 | Many async-compatible I/O operations | `asyncio`                                   |
 | CPU-heavy independent tasks          | Process pool                                |
+| CPU work inside async code           | `loop.run_in_executor()` with a process pool|
+| Blocking call inside async code      | `asyncio.to_thread()`                       |
 | Vectorized numeric work              | Optimized library before custom parallelism |
 
 ## Common hazards
 
 - Race conditions from unsynchronized shared state.
 - Deadlocks from inconsistent lock ordering.
+- A blocking call inside a coroutine stalling the entire event loop.
 - Unbounded task creation and exhausted resources.
 - Exceptions that are never retrieved from background tasks.
 - Process overhead exceeding the work performed.
@@ -157,7 +210,7 @@ Use timeouts, bounded concurrency, structured cleanup, and cancellation-aware co
 ## Experiment: asynchronous scheduling
 
 Change the delays and task count. Notice that total duration follows the slowest concurrent task rather than the sum of
-every delay.
+every delay — the hallmark of cooperative concurrency.
 
 ```python { .python-runner title="Asynchronous scheduling experiment" }
 import asyncio
@@ -185,10 +238,11 @@ await main()
 
 ## Checkpoint
 
-- Distinguish concurrency from parallelism.
-- Choose threads, processes, or async I/O based on the workload.
-- Explain the practical impact of CPython's GIL.
-- Keep blocking work off an event loop.
+- Distinguish I/O-bound from CPU-bound work before choosing a model.
+- Distinguish concurrency (interleaved progress) from parallelism (simultaneous execution).
+- Choose threads for blocking I/O, processes for CPU work, `asyncio` for many async-compatible I/O tasks.
+- Explain the practical impact of CPython's GIL: `sleep()` and socket I/O release it; pure-Python computation holds it.
+- Keep blocking work off an event loop — `await asyncio.sleep()`, never `time.sleep()`.
 - Measure before and after an optimization.
 
-**Next:** [Algorithms and problem solving](03_forge_algorithms_and_interview.md)
+**Next:** [Algorithms and problem solving](07_forge_algorithms_and_interview.md)

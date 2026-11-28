@@ -18,7 +18,7 @@ All runtime exceptions inherit from Python's built-in **BaseException** (and app
 Catch only exceptions you can handle. Keep the protected block narrow and preserve the original traceback when
 translating errors.
 
-```python { .python-runner title="Input validation experiment" }
+```python
 def parse_port(text: str) -> int:
     try:
         port = int(text)
@@ -59,7 +59,6 @@ details.
 ```python
 import unittest
 
-
 class ParsePortTests(unittest.TestCase):
     def test_accepts_valid_port(self):
         self.assertEqual(parse_port("8080"), 8080)
@@ -67,7 +66,6 @@ class ParsePortTests(unittest.TestCase):
     def test_rejects_non_numeric_port(self):
         with self.assertRaises(ValueError):
             parse_port("http")
-
 
 if __name__ == "__main__":
     unittest.main()
@@ -91,12 +89,11 @@ logs.
 
 Type hints communicate contracts and enable tools to detect mistakes before execution.
 
-```python { .python-runner title="Type contract experiment" }
+```python
 from collections.abc import Iterable, Mapping
 from typing import TypeAlias
 
 UserId: TypeAlias = int
-
 
 def active_names(users: Iterable[Mapping[str, object]]) -> list[str]:
     return [str(user["name"]) for user in users if user.get("active")]
@@ -119,10 +116,9 @@ Type hints do not validate runtime input. Use explicit checks or a validation li
 
 Try valid, nonnumeric, and out-of-range values. Modify the domain exception to preserve more context.
 
-```python { .python-runner title="Validation and exception chaining experiment" }
+```python
 class ConfigurationError(Exception):
     pass
-
 
 def parse_port(text):
     try:
@@ -132,7 +128,6 @@ def parse_port(text):
     if not 1 <= port <= 65_535:
         raise ConfigurationError("port must be between 1 and 65535")
     return port
-
 
 for value in ["8080", "http", "70000"]:
     try:

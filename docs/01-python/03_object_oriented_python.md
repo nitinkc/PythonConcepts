@@ -32,9 +32,8 @@ state.
 - A **class method** receives `cls` and commonly implements an alternate constructor.
 - A **static method** receives neither and is a utility closely related to the class.
 
-```python { .python-runner title="Alternative constructor experiment" }
+```python
 from datetime import date
-
 
 class Person:
     def __init__(self, name: str, birth_year: int):
@@ -50,15 +49,13 @@ class Person:
 
 Inheritance models an **is-a** relationship. Override behavior while preserving the parent's contract.
 
-```python { .python-runner title="Abstract polymorphism experiment" }
+```python
 from abc import ABC, abstractmethod
-
 
 class Shape(ABC):
     @abstractmethod
     def area(self) -> float:
         raise NotImplementedError
-
 
 class Rectangle(Shape):
     def __init__(self, width: float, height: float):
@@ -74,11 +71,10 @@ if an object provides the required operation, its inheritance tree may not matte
 
 ## Prefer composition for has-a relationships
 
-```python { .python-runner title="Composition experiment" }
+```python
 class Engine:
     def start(self) -> None:
         print("started")
-
 
 class Car:
     def __init__(self, engine: Engine):
@@ -91,9 +87,8 @@ Composition keeps components replaceable and avoids deep inheritance hierarchies
 
 Use `dataclass` for data-focused objects with generated initialization, representation, and equality.
 
-```python { .python-runner title="Data class experiment" }
+```python 
 from dataclasses import dataclass, field
-
 
 @dataclass(frozen=True, slots=True)
 class Point:
@@ -109,13 +104,11 @@ per-instance overhead and accidental attributes.
 
 Protocols describe behavior structurally and support type checking without requiring inheritance.
 
-```python { .python-runner title="Protocol experiment" }
+```python
 from typing import Protocol
-
 
 class Writable(Protocol):
     def write(self, text: str) -> int: ...
-
 
 def save(output: Writable, text: str) -> None:
     output.write(text)
@@ -123,11 +116,14 @@ def save(output: Writable, text: str) -> None:
 
 ## Special methods
 
-Implement special methods only when the corresponding behavior is natural: `__repr__` for debugging, `__len__` for size,
-`__iter__` for iteration, and `__enter__`/`__exit__` for resource management.
+Implement special methods only when the corresponding behavior is natural:
+
+- `__repr__` for debugging, 
+- `__len__` for size,
+- `__iter__` for iteration, and 
+- `__enter__`/`__exit__` for resource management.
 
 ## Experiment: composition and polymorphism
-
 Add another notification channel or change the formatter without modifying `AlertService`.
 
 ```python { .python-runner title="Composition and polymorphism experiment" }
@@ -135,11 +131,9 @@ class ConsoleNotifier:
     def send(self, message):
         print(f"console: {message}")
 
-
 class UppercaseFormatter:
     def format(self, message):
         return message.upper()
-
 
 class AlertService:
     def __init__(self, notifier, formatter):
@@ -148,7 +142,6 @@ class AlertService:
 
     def alert(self, message):
         self.notifier.send(self.formatter.format(message))
-
 
 service = AlertService(ConsoleNotifier(), UppercaseFormatter())
 service.alert("deployment complete")
@@ -162,4 +155,4 @@ service.alert("deployment complete")
 - Apply abstract classes or protocols to stable contracts.
 - Use data classes for data-focused models.
 
-**Next:** [Pythonic iteration and resource handling](02_scalpel_pythonic_idioms.md)
+**Next:** [Pythonic iteration and resource handling](04_scalpel_pythonic_idioms.md)

@@ -15,14 +15,44 @@ contains a value. This model explains assignment, mutability, function arguments
 | Set        | `set`, `frozenset`        | Unique values and membership |
 | Null value | `None`                    | Absence of a value           |
 
-Inspect a value with `type(value)`. Prefer explicit conversion—such as `int(text)`—at system boundaries rather than
-relying on implicit assumptions.
+- Inspect a value with `type(value)`. 
+- Prefer explicit conversion—such as `int(text)`—at system boundaries rather than relying on implicit assumptions.
+- Slicing uses `sequence[start:stop:step]`; `stop` is excluded. 
+  - Negative indexes count from the end.
 
-```python { .python-runner title="Basic values experiment" }
-name = "Ada"
-age = 36
-active = True
-message = f"{name} is {age} years old"
+
+```python 
+# { .python-runner title="Basic values experiment" }
+name:str = "Ada" 
+age:int = 36
+flag:bool = True
+
+# Type Hints
+myList:List[int] = [1,2,3,"john"] # Python is dynamically typed, so it completely ignores "type hints" when running your code.
+# For Static Type checking, use @typechecked `from typeguard import typechecked`
+myList.append("new String")
+for item in myList:
+    print(item)
+    
+ordered = sorted(myList)
+
+myTuple:Tuple = (1,2) # Immutable
+
+myRange:int  = range(2,5)
+first, *middle, last = myRange
+
+# Curlies with Set and Dict
+myDict:dict[str,int] = {"name": "Ada", "role": "engineer"}
+role = myDict.get("role", "unknown")
+print(role)
+for key, value in myDict.items():
+    print(key, value)
+
+mySet: set[int] = {1, 2, 3}
+for num in mySet:
+    print(num)
+
+print(type(myDict))
 ```
 
 ## Conditions and loops
@@ -41,8 +71,9 @@ for index, user in enumerate(users, start=1):
     print(index, user)
 ```
 
-Use `while` when repetition depends on state rather than on an iterable. `break` exits a loop, `continue` skips to its
-next iteration, and a loop's `else` block runs only when no `break` occurs.
+- `while` when repetition depends on state rather than on an iterable. 
+- `break` exits a loop, 
+- `continue` skips to its next iteration, and a loop's `else` block runs only when no `break` occurs.
 
 ## Choosing a collection
 
@@ -53,18 +84,29 @@ next iteration, and a loop's `else` block runs only when no `break` occurs.
 | Key-value lookup                   | `dict`  | Insertion ordered; keys are unique      |
 | Unique values or fast membership   | `set`   | Unordered; elements must be hashable    |
 
-```python { .python-runner title="Collection selection experiment" }
+```python 
+# { .python-runner title="Collection selection experiment" }
 items = ["apple", "banana", "apple"]
-counts = {item: items.count(item) for item in set(items)}
+
+# for item in set(items) -> get unique names from the set created with items
+# and for each set value, count the number of items from the original items list -> items.count(item)
+freq:dict[str,int] = {item: items.count(item) for item in set(items)}
+print(freq) # {'banana': 1, 'apple': 2}
 unique_items = set(items)
+print(unique_items) # {'apple', 'banana'}
 ```
 
 For counting real data, prefer `collections.Counter` over repeatedly calling `list.count`, which rescans the list.
 
 ## Mutability and identity
 
-`list`, `dict`, and `set` are mutable. Numbers, strings, tuples, and frozen sets are immutable. Assignment never copies
-an object.
+- `list`, `dict`, and `set` are **mutable**. 
+- Numbers, strings, tuples, and frozen sets are **immutable**. 
+
+Assignment ***_never_*** copies an object.
+
+- Use `==` for value equality. 
+- Use `is` for identity, most commonly `value is None`.
 
 ```python { .python-runner title="Mutability and identity experiment" }
 original = [1, 2]
@@ -74,13 +116,12 @@ assert original == [1, 2, 3]
 assert alias is original
 ```
 
-Use `==` for value equality. Use `is` for identity, most commonly `value is None`.
 
 ### Avoid shared mutable defaults
 
 Default arguments are evaluated once when a function is defined.
 
-```python { .python-runner title="Safe default argument experiment" }
+```python
 def add_item(item, items=None):
     if items is None:
         items = []
@@ -99,25 +140,9 @@ independent = deepcopy(original)
 
 A comprehension also creates independent nested rows:
 
-```python { .python-runner title="Independent nested lists experiment" }
+```python
 grid = [[0] * 3 for _ in range(3)]
 ```
-
-## Core operations
-
-```python { .python-runner title="Core collection operations experiment" }
-numbers = [3, 1, 4]
-numbers.append(2)
-first, *middle, last = numbers
-ordered = sorted(numbers)
-
-profile = {"name": "Ada", "role": "engineer"}
-role = profile.get("role", "unknown")
-for key, value in profile.items():
-    print(key, value)
-```
-
-Slicing uses `sequence[start:stop:step]`; `stop` is excluded. Negative indexes count from the end.
 
 ## Experiment: references and collections
 

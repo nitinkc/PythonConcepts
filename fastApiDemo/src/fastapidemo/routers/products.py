@@ -2,10 +2,12 @@ import random
 
 from fastapi import APIRouter, Depends, HTTPException
 
+from fastapidemo.decorators.logger import trace_log
 from fastapidemo.exception.customException import InvalidProductIdException
 from fastapidemo.models.model import Product
 # from dependencies import get_current_user
 from fastapi import status
+import logging
 
 # Dictionary/Map
 fake_db: dict[int, Product] = {
@@ -22,6 +24,7 @@ router = APIRouter(
 )
 
 @router.get("/")  # Full path: GET /products/
+@trace_log(level=logging.INFO)
 def list_products() -> dict:
     return fake_db
 

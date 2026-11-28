@@ -1,15 +1,21 @@
+import logging
+
 from fastapi import FastAPI
 
 from fastapidemo.events.lifeCycleEvents import lifespan
 from fastapidemo.models.model import ModelName
 
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format="%(asctime)s %(levelname)s %(name)s - %(message)s",
+# )
 
 app = FastAPI(lifespan=lifespan)
 
 # These modules do `from fastapidemo.main import app` and register exception
 # handlers / middleware on it as an import side effect, so they must be
 # imported only after `app` exists.
-from fastapidemo import middleware  # noqa: E402, F401
+from fastapidemo.middleware import middleware  # noqa: E402, F401
 from fastapidemo.exception import customException  # noqa: E402, F401
 from fastapidemo.routers import orders, products, users  # noqa: E402
 
